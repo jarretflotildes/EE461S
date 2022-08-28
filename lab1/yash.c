@@ -5,11 +5,19 @@
 #include <fcntl.h>
 #include <sys/wait.h>
 
+#include <readline/readline.h>
+#include <readline/history.h>
+
 int main(){
 	
 
    printf("Hello World\n");
+   char *command = readline("$");
 
+   printf("%s\n",command);
+   free(command);
+   
+/*
    while(1){
   
       // 0. Register Signal Handlers
@@ -35,6 +43,6 @@ int main(){
       // 6. Other commands for job stuff
 
    }	  
-
+*/
 }
 
