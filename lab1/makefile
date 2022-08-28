@@ -1,3 +1,3 @@
 
 yash: yash.c
-	gcc -o yash yash.c -g
+	gcc -o yash yash.c 
