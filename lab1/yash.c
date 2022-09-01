@@ -56,13 +56,9 @@ int main(){
       // 2. Grab and parse input - remove newLine modifier (\n)  
       //    each token will be no more than 30 characters 
       char **tokens = parseCommand(command);
+      int numberOfTokens = getNumberOfTokens(command);
+ 
      //3. Check for job control Token
-for(int i = 0;i<getNumberOfTokens(command)-1;i++){
-printf("tokens[%d] = %s\n",i,tokens[i]);
-}
-	
-      freeParseCommand(tokens,getNumberOfTokens(command)-1);
-      free(command); 
 /*
       if(strstr(command,">")){
          //get location of token
@@ -72,8 +68,6 @@ printf("tokens[%d] = %s\n",i,tokens[i]);
 	 //remove > from array
       }*/
 
-     
-/*
       //4. Determine number of children processes to create (# times to call fork()) 
       pid = fork();
  
@@ -86,32 +80,38 @@ printf("tokens[%d] = %s\n",i,tokens[i]);
       // 6. Other commands for job stuff
 
  
-      freeParseCommand(tokens);
+      freeParseCommand(tokens,numberOfTokens);
       free(command);
       wait((int*)NULL);
- */
+ 
    }
 
 }
 
 char **parseCommand(char *command){ 
+
       char **tokens;
       char *token;
       char *savePtr;
-      char *commandCopy = strdup(command);
+      char *commandCopy; 
+      char *toFree;
+      
+      commandCopy = toFree = strdup(command);
+
       int stringLength = 30;          //each token will be no more than 30 characters
 
       tokens = malloc(getNumberOfTokens(command) * sizeof(char*));        
 
       int i = 0;
-      commandCopy = strdup(command);
 
       while((token = strtok_r(commandCopy," ", &savePtr))){
-        tokens[i] = (char*)malloc(stringLength + sizeof(char));
-        tokens[i] = token;
+        tokens[i] = malloc(stringLength + sizeof(char));
+        strcpy(tokens[i],token);
 	commandCopy = NULL;
         i++;
       }
+
+      free(toFree);
      
       return tokens;
 }
@@ -119,7 +119,9 @@ char **parseCommand(char *command){
 int getNumberOfTokens(char *command){
       
       char *savePtr;
-      char *commandCopy = strdup(command);
+      char *commandCopy;
+      char *toFree;
+      commandCopy = toFree = strdup(command);
  
       int i = 0;
       while(strtok_r(commandCopy," ", &savePtr)){
@@ -127,13 +129,14 @@ int getNumberOfTokens(char *command){
 	 commandCopy = NULL;
       }
 
-      return i+1;
+      free(toFree);
+
+      return i;
 
 }
 
 
 void freeParseCommand(char **tokens,int tokenNumber){
-   
    
    for(int i = 0;i<tokenNumber;i++){
       free(tokens[i]);
