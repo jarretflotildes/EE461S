@@ -17,8 +17,9 @@
 
 
 char **parseCommand(char *command); 
-void freeParseCommand(char **tokens);
+void freeParseCommand(char **tokens,int tokenNumber);
 
+int getNumberOfTokens(char *command); 
 int getTokenLocation(char *tokens[],char *string);
 char **removeElem(char *tokens[],int location);
   
@@ -54,19 +55,14 @@ int main(){
 
       // 2. Grab and parse input - remove newLine modifier (\n)  
       //    each token will be no more than 30 characters 
-      char *tokens[64] = {NULL};
-      char *token;
-      char *savePtr;
-      char *commandCopy = strdup(command);
-     
-      int i = 0;
-      tokens[i] = strtok_r(commandCopy," ",&savePtr);
-      while(strtok_r(NULL," ", &savePtr)){
-         i++; 
-         tokens[i] = token; 
-      } 
-  
-      //3. Check for job control Token
+      char **tokens = parseCommand(command);
+     //3. Check for job control Token
+for(int i = 0;i<getNumberOfTokens(command)-1;i++){
+printf("tokens[%d] = %s\n",i,tokens[i]);
+}
+	
+      freeParseCommand(tokens,getNumberOfTokens(command)-1);
+      free(command); 
 /*
       if(strstr(command,">")){
          //get location of token
@@ -77,7 +73,7 @@ int main(){
       }*/
 
      
-
+/*
       //4. Determine number of children processes to create (# times to call fork()) 
       pid = fork();
  
@@ -89,9 +85,11 @@ int main(){
     
       // 6. Other commands for job stuff
 
+ 
+      freeParseCommand(tokens);
       free(command);
       wait((int*)NULL);
- 
+ */
    }
 
 }
@@ -101,43 +99,46 @@ char **parseCommand(char *command){
       char *token;
       char *savePtr;
       char *commandCopy = strdup(command);
- 
-      int stringSize = 30;          //each token will be no more than 30 characters
-     
+      int stringLength = 30;          //each token will be no more than 30 characters
+
+      tokens = malloc(getNumberOfTokens(command) * sizeof(char*));        
+
       int i = 0;
-      strtok_r(commandCopy," ",&savePtr);
-      while(strtok_r(NULL," ", &savePtr)){
-         i++; 
-      }
-
-      i++;
-      tokens = malloc(i * sizeof(char*));        
-
-
-      i = 0;
       commandCopy = strdup(command);
 
-      tokens[i] = malloc(stringSize * sizeof(char));  
-      tokens[i] = strtok_r(commandCopy," ",&savePtr);
-      
-      while((token = strtok_r(NULL," ", &savePtr))){
-         i++;
-	 tokens[i] = (char*)malloc(stringSize + sizeof(char));
-         tokens[i] = token;
+      while((token = strtok_r(commandCopy," ", &savePtr))){
+        tokens[i] = (char*)malloc(stringLength + sizeof(char));
+        tokens[i] = token;
+	commandCopy = NULL;
+        i++;
       }
      
       return tokens;
 }
 
+int getNumberOfTokens(char *command){
+      
+      char *savePtr;
+      char *commandCopy = strdup(command);
+ 
+      int i = 0;
+      while(strtok_r(commandCopy," ", &savePtr)){
+         i++; 
+	 commandCopy = NULL;
+      }
 
-void freeParseCommand(char **tokens){
-   int i = 0;
-   free(tokens[0]);
-   /*
-   while(tokens[i] != NULL){
-     free(tokens[i]);
-     i++;
-   }*/
+      return i+1;
+
+}
+
+
+void freeParseCommand(char **tokens,int tokenNumber){
+   
+   
+   for(int i = 0;i<tokenNumber;i++){
+      free(tokens[i]);
+   }
+
    free(tokens);
 }
 
@@ -174,6 +175,7 @@ char **removeElem(char *tokens[],int location){
 
    return tokens;   
 }
+
 
 
 
