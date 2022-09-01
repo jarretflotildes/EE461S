@@ -1,5 +1,6 @@
 /*
  *
+ *
  *  
  *
  * 
@@ -14,15 +15,12 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-
-
 char **parseCommand(char *command); 
-void freeParseCommand(char **tokens,int tokenNumber);
+void freeParseCommand(char **tokens,int tokenNum);
 
 int getNumberOfTokens(char *command); 
 int getTokenLocation(char *tokens[],char *string);
-char **removeElem(char *tokens[],int location);
-  
+ 
 static void sig_int(int signo) {
    printf("caught SIGINT\n");
 }
@@ -56,17 +54,17 @@ int main(){
       // 2. Grab and parse input - remove newLine modifier (\n)  
       //    each token will be no more than 30 characters 
       char **tokens = parseCommand(command);
-      int numberOfTokens = getNumberOfTokens(command);
- 
-     //3. Check for job control Token
-/*
+      int tokenNum = getNumberOfTokens(command);
+
+      //3. Check for job control Token
+
       if(strstr(command,">")){
-         //get location of token
-	 int location = getTokenLocation(tokens,">");
-	 int fd = open(tokens[location + 1],O_RDWR,mode); //file name is next value in array
-	 dup2(fd,1);
-	 //remove > from array
-      }*/
+        //get location of token
+	int location = getTokenLocation(tokens,">");
+	int fd = open(tokens[location + 1],O_RDWR,mode); //file name is next value in array
+	dup2(fd,1);
+	//remove > from array
+      }
 
       //4. Determine number of children processes to create (# times to call fork()) 
       pid = fork();
@@ -78,11 +76,9 @@ int main(){
       } 
     
       // 6. Other commands for job stuff
-
- 
-      freeParseCommand(tokens,numberOfTokens);
+      freeParseCommand(tokens,tokenNum);
       free(command);
-      wait((int*)NULL);
+      wait((int*)NULL); //wait for any child
  
    }
 
@@ -100,7 +96,7 @@ char **parseCommand(char *command){
 
       int stringLength = 30;          //each token will be no more than 30 characters
 
-      tokens = malloc(getNumberOfTokens(command) * sizeof(char*));       
+      tokens = malloc((getNumberOfTokens(command)) * sizeof(char*));   
 
       int i = 0;
 
@@ -112,6 +108,7 @@ char **parseCommand(char *command){
       }
 
       free(toFree);
+      tokens[i] = NULL;
      
       return tokens;
 }
@@ -131,14 +128,14 @@ int getNumberOfTokens(char *command){
 
       free(toFree);
 
-      return i;
+      return i+1; //+1 for NULL terminator
 
 }
 
 
-void freeParseCommand(char **tokens,int tokenNumber){
+void freeParseCommand(char **tokens,int tokenNum){
    
-   for(int i = 0;i<tokenNumber;i++){
+   for(int i = 0;i<tokenNum;i++){
       free(tokens[i]);
    }
 
@@ -165,16 +162,3 @@ int getTokenLocation(char *tokens[],char *string){
 
 }
 
-char **removeElem(char *tokens[],int location){
-
-   int i = location;	 
-   int j = location + 1;
-   while(tokens[j] != NULL){
-      tokens[i] = tokens[j];
-      i++; 
-      j++;
-   }
-   tokens[j] = NULL; 
-
-   return tokens;   
-}
