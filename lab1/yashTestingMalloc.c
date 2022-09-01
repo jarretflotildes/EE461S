@@ -54,19 +54,14 @@ int main(){
 
       // 2. Grab and parse input - remove newLine modifier (\n)  
       //    each token will be no more than 30 characters 
-      char *tokens[64] = {NULL};
-      char *token;
-      char *savePtr;
-      char *commandCopy = strdup(command);
-     
-      int i = 0;
-      tokens[i] = strtok_r(commandCopy," ",&savePtr);
-      while(strtok_r(NULL," ", &savePtr)){
-         i++; 
-         tokens[i] = token; 
-      } 
-  
-      //3. Check for job control Token
+      char **tokens = parseCommand(command);
+     //3. Check for job control Token
+int i = 0;
+printf("tokens[i] = %s\n",tokens[i]);
+
+	
+      freeParseCommand(tokens);
+      free(command); 
 /*
       if(strstr(command,">")){
          //get location of token
@@ -77,7 +72,7 @@ int main(){
       }*/
 
      
-
+/*
       //4. Determine number of children processes to create (# times to call fork()) 
       pid = fork();
  
@@ -89,9 +84,11 @@ int main(){
     
       // 6. Other commands for job stuff
 
+ 
+      freeParseCommand(tokens);
       free(command);
       wait((int*)NULL);
- 
+ */
    }
 
 }
