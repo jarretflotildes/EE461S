@@ -100,7 +100,7 @@ char **parseCommand(char *command){
 
       int stringLength = 30;          //each token will be no more than 30 characters
 
-      tokens = malloc(getNumberOfTokens(command) * sizeof(char*));        
+      tokens = malloc(getNumberOfTokens(command) * sizeof(char*));       
 
       int i = 0;
 
@@ -178,7 +178,3 @@ char **removeElem(char *tokens[],int location){
 
    return tokens;   
 }
-
-
-
-
