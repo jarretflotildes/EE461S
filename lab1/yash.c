@@ -1,6 +1,7 @@
 /*
  *
  *
+ *
  *  
  *
  * 
@@ -20,31 +21,23 @@ void freeParseCommand(char **tokens,int tokenNum);
 
 int getNumberOfTokens(char *command); 
 int getTokenLocation(char *tokens[],char *string);
- 
-static void sig_int(int signo) {
-   printf("caught SIGINT\n");
-}
+
+void removeElem(char **tokens,int tokenNum);
 
 int main(){
 	
    printf("Hello World\n");
+
    char *command;    
    pid_t pid = -1;
+
+   int pipefd[2] = {0};
+   int status = 0;
+   int done = 0;
 
    mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
 
    // 0. Register Signal Handlers
-   /*Signals (SIGINT, SIGTSTP, SIGCHLD)
-	   - Ctrl-c must quit current foreground process (if one exists) and not the shell
-	   and should not print the process (unlike bash)
-	   - Ctrl-z must send SIGTSTP to the current foreground process and should not
-	   print the process (unlike bash)
-	   - The shell will not be stopped on SIGTSTP
-
-   if (signal(SIGINT, sig_int) == SIG_ERR){
-      printf("signal(SIGINT) error");
-   }
-   */
 
    while(1){
 
@@ -58,28 +51,21 @@ int main(){
 
       //3. Check for job control Token
 
-      if(strstr(command,">")){
-        //get location of token
-	int location = getTokenLocation(tokens,">");
-	int fd = open(tokens[location + 1],O_RDWR,mode); //file name is next value in array
-	dup2(fd,1);
-	//remove > from array
-      }
-
       //4. Determine number of children processes to create (# times to call fork()) 
       pid = fork();
  
-      // 5. execute commands using execvo or execlp   
+      // 5. execute commands using execvp or execlp   
       if(pid == 0){
          execvp(tokens[0],tokens);// first in array is always command
 	 exit(0);
       } 
-    
+      
+      wait((int*)NULL); //wait for any child
       // 6. Other commands for job stuff
+    
       freeParseCommand(tokens,tokenNum);
       free(command);
-      wait((int*)NULL); //wait for any child
- 
+
    }
 
 }
@@ -108,7 +94,9 @@ char **parseCommand(char *command){
       }
 
       free(toFree);
+ 
       tokens[i] = NULL;
+
      
       return tokens;
 }
