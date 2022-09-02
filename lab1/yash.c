@@ -22,8 +22,6 @@ void freeParseCommand(char **tokens,int tokenNum);
 int getNumberOfTokens(char *command); 
 int getTokenLocation(char *tokens[],char *string);
 
-void removeElem(char **tokens,int tokenNum);
-
 int main(){
 	
    printf("Hello World\n");
@@ -48,9 +46,8 @@ int main(){
       //    each token will be no more than 30 characters 
       char **tokens = parseCommand(command);
       int tokenNum = getNumberOfTokens(command);
-
-      //3. Check for job control Token
-
+       //3. Check for job control Token
+/*
       //4. Determine number of children processes to create (# times to call fork()) 
       pid = fork();
  
@@ -62,7 +59,7 @@ int main(){
       
       wait((int*)NULL); //wait for any child
       // 6. Other commands for job stuff
-    
+  */  
       freeParseCommand(tokens,tokenNum);
       free(command);
 
@@ -128,6 +125,7 @@ void freeParseCommand(char **tokens,int tokenNum){
    }
 
    free(tokens);
+   tokens = NULL;
 }
 
 
