@@ -1,6 +1,6 @@
 
-yash: main.o parse.o actionModule.o
-	gcc -o yash main.o parse.o actionModule.o -lreadline 
+yash: main.o parse.o actionModule.o signals.o
+	gcc -o yash main.o parse.o actionModule.o signals.o -lreadline 
 
 main.o: main.c parse.h
 	gcc -c -g main.c
@@ -10,3 +10,6 @@ parse.o: parse.c parse.h
 
 actionModule.o:actionModule.c actionModule.h
 	gcc -c -g actionModule.c
+
+signals.o:signals.c signals.h
+	gcc -c -g signals.c

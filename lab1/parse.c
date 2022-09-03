@@ -1,4 +1,5 @@
 #include <stdlib.h>
+
 #include <string.h>
 
 #include "parse.h"
@@ -81,6 +82,23 @@ int getTokenLocation(char *tokens[],char *string){
 
     return location;
 
+}
+
+char **chopArray(char **originalArray,int size,int start,int end){
+
+   int stringLength = 30;
+
+   char **newArray = malloc(sizeof(char*) * size);
+   
+   int i = start;
+   for(i = start;i<end;i++){
+      newArray[i] = malloc(sizeof(char) * stringLength);
+      newArray[i] = originalArray[i];
+   }
+ 
+   newArray[i] = NULL;
+
+   return newArray;
 }
 
 

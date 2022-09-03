@@ -9,44 +9,32 @@
 #include "actionModule.h"
 
 void pipeCommand(char **tokens,int tokenNum,int status,int pipefd[],int location){
-	pid_t pid = fork();  	   
+
 	int stringLength = 30;
+	
+	pid_t pid = fork();  	   
 
 	if(pid == 0){
 	   close(pipefd[0]);              //close unused read end 
-           dup2(pipefd[1],STDOUT_FILENO); //output goes to right end ok pipe token
-	      
-	   //get left side of pipe
-	   char **pipeLeft = malloc(sizeof(char*) * location);
-           int i;
-	   for(i = 0;i<location;i++){
-	      pipeLeft[i] = malloc(sizeof(char) * stringLength);
-	      pipeLeft[i] = tokens[i];
-           }
-	   pipeLeft[i] = NULL;
-	   //check for file redirection
-           execvp(pipeLeft[0],pipeLeft); 
+           dup2(pipefd[1],STDOUT_FILENO); //output goes to right end ok pipe token	      
+	   char **pipeLeft = chopArray(tokens,location,0,location);
+	   //check for file redirection        
+	   execvp(pipeLeft[0],pipeLeft); 
+	   exit(0);
+	}
+
+	if(pid == 0){
+           close(pipefd[1]);              //close unused write end
+           dup2(pipefd[0],STDIN_FILENO);
+	   int end = tokenNum - location;
+	   char **pipeRight = chopArray(tokens,end,location,end);
+	   //check for file redirection	
+	   execvp(pipeRight[0],pipeRight);
 	   exit(0);
 	}
 
 	pid = fork();
-	if(pid == 0){
-           close(pipefd[1]);              //close unused write end
-           dup2(pipefd[0],STDIN_FILENO);
-	   //get right side of pipe
-           char **pipeRight = malloc(sizeof(char*) * (tokenNum-location));
-	   int i = location;
-	   i++;
-	   while(tokens[i]!=NULL){
-	      pipeRight[i] = malloc(sizeof(char) * stringLength);    
-              pipeRight[i] = tokens[i];
-              i++;
-	   }
-	   pipeRight[i] = NULL;
-	   //check for file redirection
-	   execvp(pipeRight[0],pipeRight);
-	   exit(0);
-	}
+
 	close(pipefd[0]);
 	close(pipefd[1]);
         waitpid(-1,&status,0);
@@ -54,3 +42,5 @@ void pipeCommand(char **tokens,int tokenNum,int status,int pipefd[],int location
 	exit(0);
 
 }
+
+
