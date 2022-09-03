@@ -1,3 +1,0 @@
-ash
-yash.c
-yashArrayMessing.c

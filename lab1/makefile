@@ -13,3 +13,6 @@ actionModule.o:actionModule.c actionModule.h
 
 signals.o:signals.c signals.h
 	gcc -c -g signals.c
+
+clean: 
+	rm -f yash *.o
