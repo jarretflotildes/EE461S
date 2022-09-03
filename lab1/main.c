@@ -52,7 +52,7 @@ int main(){
 	int location = getTokenLocation(tokens,"|");        
         pid = fork();              //child takes care of piping children
 	if(pid == 0){
-          pipeCommand(tokens,tokenNum,status,pipefd,location);		
+          pipeCommand(tokens,tokenNum,status,location);		
 	} 
 	else{		
            waitpid(pid,&status,0); //parent waits for child in charge of piping children	

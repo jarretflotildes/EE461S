@@ -1,2 +1,2 @@
-void pipeCommand(char **tokens,int tokenNum,int status,int pipefd[],int location);	
+void pipeCommand(char **tokens,int tokenNum,int status,int location);	
 

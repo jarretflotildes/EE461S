@@ -1,7 +1,8 @@
 #include <stdlib.h>
-
 #include <string.h>
 
+
+#include <stdio.h>
 #include "parse.h"
 
 char **parseCommand(char *command){ 
@@ -16,7 +17,7 @@ char **parseCommand(char *command){
 
       int stringLength = 30;          //each token will be no more than 30 characters
 
-      tokens = malloc((getNumberOfTokens(command)) * sizeof(char*));   
+      tokens = malloc((getNumberOfTokens(command)+1) * sizeof(char*));   //+1 for null
 
       int i = 0;
 
@@ -61,7 +62,7 @@ int getNumberOfTokens(char *command){
 
       free(toFree);
 
-      return i+1; //+1 for NULL terminator
+      return i; 
 
 }
 
@@ -89,11 +90,12 @@ char **chopArray(char **originalArray,int size,int start,int end){
    int stringLength = 30;
 
    char **newArray = malloc(sizeof(char*) * size);
-   
-   int i = start;
-   for(i = start;i<end;i++){
+   int i = 0; 
+ 
+   for(int j = start;j<end;j++){
       newArray[i] = malloc(sizeof(char) * stringLength);
-      newArray[i] = originalArray[i];
+      newArray[i] = originalArray[j];
+      i++;
    }
  
    newArray[i] = NULL;
