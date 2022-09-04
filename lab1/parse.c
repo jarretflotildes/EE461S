@@ -102,6 +102,22 @@ void printArray(char **array){
     }
 }
 
+//returns -1 if string not in array
+int getLocationOfStringArray(char **array,char *string){
+
+    int location = -1;
+    int i = 0;
+    while(array[i]!=NULL){
+       if(strstr(array[i],string)){
+          location = i;
+	  break;
+       }
+       i++;
+    }
+    return location;
+
+}
+
 char **chopArray(char **originalArray,int size,int start,int end){
 
    char **newArray = malloc(sizeof(char*) * size);

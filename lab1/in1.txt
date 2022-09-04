@@ -1,18 +1,7 @@
-total 124
--rw-r--r-- 1 glad glad  2328 Sep  4 13:45 actionModule.c
--rw-r--r-- 1 glad glad   134 Sep  3 22:53 actionModule.h
--rw-r--r-- 1 glad glad  9496 Sep  4 13:46 actionModule.o
--rw-r--r-- 1 glad glad     0 Sep  4 00:39 adsf
--rw-r--r-- 1 glad glad    44 Sep  4 01:36 b.txt
--rw-r--r-- 1 glad glad    98 Sep  4 13:44 in1.txt
--rw-r--r-- 1 glad glad  1866 Sep  4 13:38 main.c
--rw-r--r-- 1 glad glad 16928 Sep  4 13:38 main.o
--rw-r--r-- 1 glad glad   348 Sep  2 20:24 makefile
--rw-r--r-- 1 glad glad  2682 Sep  4 01:26 parse.c
--rw-r--r-- 1 glad glad   364 Sep  3 23:48 parse.h
--rw-r--r-- 1 glad glad 11616 Sep  4 12:26 parse.o
--rw-r--r-- 1 glad glad   814 Sep  1 21:07 pipe.c
--rw-r--r-- 1 glad glad   427 Sep  2 19:16 signals.c
--rw-r--r-- 1 glad glad     2 Sep  2 19:17 signals.h
--rw-r--r-- 1 glad glad  3152 Sep  4 12:26 signals.o
--rwxr-xr-x 1 glad glad 32288 Sep  4 13:46 yash
+
+asdf
+asdf
+a
+sdf
+afds
+Z

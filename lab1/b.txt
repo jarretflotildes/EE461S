@@ -1,1 +1,19 @@
--rw-r--r-- 1 glad glad 0 Sep  4 00:57 b.txt
+actionModule.c
+actionModule.h
+actionModule.o
+adsf
+b.txt
+in1.txt
+main.c
+main.o
+makefile
+parse.c
+parse.h
+parse.o
+pipe.c
+signals.c
+signals.h
+signals.o
+users
+wc
+yash

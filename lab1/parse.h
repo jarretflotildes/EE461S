@@ -1,6 +1,7 @@
 char **parseCommand(char *command); 
 void freeParseCommand(char **tokens,int tokenNum);
 int getNumberOfTokens(char *command); 
+int getLocationOfStringArray(char **array,char *string);
 int getTokenLocation(char *tokens[],char *string);
 int sizeOfArray(char **array); 
 void printArray(char **array); 
