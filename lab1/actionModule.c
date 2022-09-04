@@ -8,6 +8,8 @@
 #include "parse.h"
 #include "actionModule.h"
 
+#define mode S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH
+
 void pipeCommand(char **tokens,int tokenNum,int status,int location){
 
 	int stringLength = 30;
@@ -25,8 +27,8 @@ void pipeCommand(char **tokens,int tokenNum,int status,int location){
 	      close(pipefd[0]);              //close unused read end 
               dup2(pipefd[1],STDOUT_FILENO); //output goes to right end ok pipe token	      
 	      char **pipeLeft = chopArray(tokens,location,0,location);
-	      //check for file redirection        
-	      execvp(pipeLeft[0],pipeLeft); 
+              redirectionChecks(pipeLeft);
+              execvp(pipeLeft[0],pipeLeft); 
 	      exit(0);
 	   }
 
@@ -36,7 +38,7 @@ void pipeCommand(char **tokens,int tokenNum,int status,int location){
               close(pipefd[1]);              //close unused write end
               dup2(pipefd[0],STDIN_FILENO);
 	      char **pipeRight = chopArray(tokens,tokenNum,location+1,tokenNum);
-	      //check for file redirection	
+              redirectionChecks(pipeRight);
 	      execvp(pipeRight[0],pipeRight);
 	      exit(0);
 	   }
@@ -58,6 +60,13 @@ void pipeCommand(char **tokens,int tokenNum,int status,int location){
 //ONLY USE INSIDE CHILD PROCESS
 void redirectionChecks(char **tokens){
 
+    //2> has to be checked before >
+    if(getLocationOfStringArray(tokens,"2>") != -1){
+        int location = getTokenLocation(tokens,"2>");        
+	stdErrNextToken(tokens,sizeOfArray(tokens),location);
+	exit(0);
+    }
+
     if(getLocationOfStringArray(tokens,">") != -1){
         int location = getTokenLocation(tokens,">");        
 	stdOutNextToken(tokens,sizeOfArray(tokens),location);
@@ -69,7 +78,16 @@ void redirectionChecks(char **tokens){
 	stdInNextToken(tokens,sizeOfArray(tokens),location);
 	exit(0);
     }
+}
 
+void pipeCheck(char **tokens){
+ 
+
+      if(getLocationOfStringArray(tokens,"|") != -1){
+            int location = getTokenLocation(tokens,"|");
+            int status = 0;	    
+            pipeCommand(tokens,sizeOfArray(tokens),status,location);		
+      } 
 }
 
 
@@ -84,15 +102,8 @@ void stdInNextToken(char **tokens,int tokenNum,int location){
 	   char **leftSide = chopArray(tokens,location,0,location);
 	   char **rightSide = chopArray(tokens,tokenNum,location+2,tokenNum); //ignore < and file.txt
 	   char **mergedArray = mergeArray(leftSide,rightSide);
-//printf("size of left array is %d\n",sizeOfArray(leftSide));
-//printf("size of right array is %d\n",sizeOfArray(rightSide));
-//printf("size of merged array is %d\n",sizeOfArray(mergedArray));
 
-//printf("commandv args are \n");
-//  	   printArray(mergedArray); 
-//	  printArray(rightSide);
-	 //printArray(leftSide);
-	   fd = open(tokens[location+1],O_RDWR); //file is right after >         
+	   fd = open(tokens[location+1],O_RDWR,mode); //file is right after >         
            dup2(fd,0);
 	   
 	   redirectionChecks(mergedArray);
@@ -118,7 +129,8 @@ void stdOutNextToken(char **tokens,int tokenNum,int location){
 	   char **leftSide = chopArray(tokens,location,0,location);
 	   char **rightSide = chopArray(tokens,tokenNum,location+2,tokenNum); //ignore > and file.txt
 	   char **mergedArray = mergeArray(leftSide,rightSide);
-	   fd = open(tokens[location+1],O_RDWR); //file is right after >         
+
+	   fd = open(tokens[location+1],O_RDWR,mode); //file is right after >         
            dup2(fd,1);
  	    
 	   redirectionChecks(mergedArray);
@@ -144,7 +156,7 @@ void stdErrNextToken(char **tokens,int tokenNum,int location){
 	   char **leftSide = chopArray(tokens,location,0,location);
 	   char **rightSide = chopArray(tokens,tokenNum,location+2,tokenNum); //ignore 2> and file.txt
 	   char **mergedArray = mergeArray(leftSide,rightSide);
-	   fd = open(tokens[location+1],O_RDWR); //file is right after 2>         
+	   fd = open(tokens[location+1],O_RDWR,mode); //file is right after 2>         
            dup2(fd,2);
  	    
 	   redirectionChecks(mergedArray);
@@ -158,3 +170,5 @@ void stdErrNextToken(char **tokens,int tokenNum,int location){
  	}	
 
 }	
+
+

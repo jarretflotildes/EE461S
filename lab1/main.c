@@ -52,29 +52,30 @@ int main(){
       //< will replace stdin with the file that is the next token
       //> will replace stdout with the file that is the next token
       //2> will replace stderr with the file that is the next token
-      if(strstr(command,"<")){
-         int location = getTokenLocation(tokens,"<");        
-	 stdInNextToken(tokens,tokenNum,location);
+
+      if(strstr(command,"2>")){
+            int location = getTokenLocation(tokens,"2>");
+            stdErrNextToken(tokens,tokenNum,location);
+      } else if(strstr(command,"<")){
+            int location = getTokenLocation(tokens,"<");        
+	    stdInNextToken(tokens,tokenNum,location);
       } else if(strstr(command,">")){
             int location = getTokenLocation(tokens,">");        
 	    stdOutNextToken(tokens,tokenNum,location);
-      } else if(strstr(command,"2>")){
-            int location = getTokenLocation(tokens,"2>");
-            stdErrNextToken(tokens,tokenNum,location);
-      } else if(strstr(command,"|")){
+      }else if(strstr(command,"|")){
             int location = getTokenLocation(tokens,"|");        
             pipeCommand(tokens,tokenNum,status,location);		
       } 
-/* 
-      //normal exec
-      pid = fork();
-      // 5. execute commands using execvp or execlp   
-      if(pid == 0){
-         execvp(tokens[0],tokens);// first in array is always command
-	 exit(0);
-      } 
-      wait((int*)NULL); //wait for any child
-*/
+      else { 
+         //normal exec
+         pid = fork();
+         // 5. execute commands using execvp or execlp   
+         if(pid == 0){
+            execvp(tokens[0],tokens);// first in array is always command
+	    exit(0);
+         } 
+         wait((int*)NULL); //wait for any child
+      }
 
       // 6. Other commands for job stuff
       freeParseCommand(tokens,tokenNum);
