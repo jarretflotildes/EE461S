@@ -47,13 +47,13 @@ int main(){
       int tokenNum = getNumberOfTokens(command);
       //3. Check for job control Token
       //4. Determine number of children processes to create (# times to call fork()) 
-
+/*
      //User wants to Pipe
       if(strstr(command,"|")){
 	int location = getTokenLocation(tokens,"|");        
         pipeCommand(tokens,tokenNum,status,location);		
       } 
-      
+  */    
       //check for redirections
       //< will replace stdin with the file that is the next token
       //> will replace stdout with the file that is the next token

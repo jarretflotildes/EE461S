@@ -64,7 +64,7 @@ void stdInNextToken(char **tokens,int tokenNum,int location){
 
 	if(pid == 0){
 	   char **leftSide = chopArray(tokens,location,0,location);
-	   char **rightSide = chopArray(tokens,tokenNum,location+1,tokenNum);
+	   char **rightSide = chopArray(tokens,tokenNum,location+2,tokenNum); //ignore > and file.txt
 	   char **mergedArray = mergeArray(leftSide,rightSide);
 //printf("size of left array is %d\n",sizeOfArray(leftSide));
 //printf("size of right array is %d\n",sizeOfArray(rightSide));
@@ -74,22 +74,9 @@ void stdInNextToken(char **tokens,int tokenNum,int location){
 //  	   printArray(mergedArray); 
 //	  printArray(rightSide);
 	 //printArray(leftSide);
-
-	   fd = open(rightSide[0],O_RDWR);        
+	   fd = open(tokens[location+1],O_RDWR); //file is right after >         
            dup2(fd,1);
-
-	   //check right side for any other redirections or pipes 
-/*	   if(strstr(*rightSide,"|")){
-  	      int location = getTokenLocation(tokens,"|");        
-	      pipeCommand(mergedArray,sizeOfArray(mergedArray),0,location);
-
-      	   } else{
-*/
-           execvp(tokens[0],rightSide);
-
-	
-//	   }
-	
+           execvp(tokens[0],mergedArray);	
            exit(0);	 
 	}
 
