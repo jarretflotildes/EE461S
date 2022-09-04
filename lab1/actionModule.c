@@ -21,8 +21,6 @@ void pipeCommand(char **tokens,int tokenNum,int status,int location){
            dup2(pipefd[1],STDOUT_FILENO); //output goes to right end ok pipe token	      
 	   char **pipeLeft = chopArray(tokens,location,0,location);
 
-	   int i = 0;
-
 	   //check for file redirection        
 	   execvp(pipeLeft[0],pipeLeft); 
 	   exit(0);

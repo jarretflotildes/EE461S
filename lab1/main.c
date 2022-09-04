@@ -32,6 +32,7 @@ int main(){
 	
    mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
 
+   int fd = 0;
    // 0. Register Signal Handlers
 
 
@@ -46,7 +47,8 @@ int main(){
       int tokenNum = getNumberOfTokens(command);
       //3. Check for job control Token
       //4. Determine number of children processes to create (# times to call fork()) 
-   
+
+            
       //User wants to Pipe
       if(strstr(command,"|")){
 	int location = getTokenLocation(tokens,"|");        
@@ -58,6 +60,30 @@ int main(){
            waitpid(pid,&status,0); //parent waits for child in charge of piping children	
         }
       } 
+      
+      //check for redirections
+      //< will replace stdin with the file that is the next token
+      //> will replace stdout with the file that is the next token
+      //2> will replace stderr with the file that is the next token
+      if(strstr(command,">")){
+	 pid = fork();
+	 int location = getTokenLocation(tokens,">");        
+
+	 if(pid==0){
+	    fd = open(tokens[2],O_RDWR);        
+	    dup2(fd,1);
+	    char **rightSide = chopArray(tokens,tokenNum,location+1,tokenNum);
+	    execvp(tokens[0],rightSide);
+	    exit(0);	    
+         }
+      }  
+      else{ 
+         wait((int*)NULL);
+      }
+
+
+
+/*
       //normal exec
       else {  
   	 pid = fork();
@@ -67,8 +93,9 @@ int main(){
 	    exit(0);
          } 
          wait((int*)NULL); //wait for any child
-      }
 
+      }
+*/
       // 6. Other commands for job stuff
       
 

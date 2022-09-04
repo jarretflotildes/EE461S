@@ -1,1 +1,16 @@
-in1.txt stuff
+actionModule.c
+actionModule.h
+actionModule.o
+in1.txt
+main.c
+main.ci
+main.o
+makefile
+parse.c
+parse.h
+parse.o
+pipe.c
+signals.c
+signals.h
+signals.o
+yash
