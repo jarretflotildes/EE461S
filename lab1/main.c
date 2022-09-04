@@ -48,17 +48,10 @@ int main(){
       //3. Check for job control Token
       //4. Determine number of children processes to create (# times to call fork()) 
 
-            
-      //User wants to Pipe
+     //User wants to Pipe
       if(strstr(command,"|")){
 	int location = getTokenLocation(tokens,"|");        
-        pid = fork();              //child takes care of piping children
-	if(pid == 0){
-          pipeCommand(tokens,tokenNum,status,location);		
-	} 
-	else{		
-           waitpid(pid,&status,0); //parent waits for child in charge of piping children	
-        }
+        pipeCommand(tokens,tokenNum,status,location);		
       } 
       
       //check for redirections
@@ -66,39 +59,21 @@ int main(){
       //> will replace stdout with the file that is the next token
       //2> will replace stderr with the file that is the next token
       if(strstr(command,">")){
-	 pid = fork();
-	 int location = getTokenLocation(tokens,">");        
-
-	 if(pid==0){
-	    fd = open(tokens[2],O_RDWR);        
-	    dup2(fd,1);
-	    char **rightSide = chopArray(tokens,tokenNum,location+1,tokenNum);
-	    execvp(tokens[0],rightSide);
-	    exit(0);	    
-         }
-      }  
-      else{ 
-         wait((int*)NULL);
-      }
-
-
-
-/*
+         int location = getTokenLocation(tokens,">");        
+	 stdInNextToken(tokens,tokenNum,location);
+      } 
+/* 
       //normal exec
-      else {  
-  	 pid = fork();
-         // 5. execute commands using execvp or execlp   
-         if(pid == 0){
-            execvp(tokens[0],tokens);// first in array is always command
-	    exit(0);
-         } 
-         wait((int*)NULL); //wait for any child
-
-      }
+      pid = fork();
+      // 5. execute commands using execvp or execlp   
+      if(pid == 0){
+         execvp(tokens[0],tokens);// first in array is always command
+	 exit(0);
+      } 
+      wait((int*)NULL); //wait for any child
 */
-      // 6. Other commands for job stuff
-      
 
+      // 6. Other commands for job stuff
       freeParseCommand(tokens,tokenNum);
       free(command);
 

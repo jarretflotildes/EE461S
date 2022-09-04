@@ -1,9 +1,10 @@
 actionModule.c
 actionModule.h
 actionModule.o
+adsf
+b.txt
 in1.txt
 main.c
-main.ci
 main.o
 makefile
 parse.c

@@ -1,9 +1,11 @@
 #include <stdlib.h>
+
 #include <string.h>
-
-
 #include <stdio.h>
 #include "parse.h"
+
+#define stringLength 30
+
 
 char **parseCommand(char *command){ 
 
@@ -15,7 +17,6 @@ char **parseCommand(char *command){
       
       commandCopy = toFree = strdup(command);
 
-      int stringLength = 30;          //each token will be no more than 30 characters
 
       tokens = malloc((getNumberOfTokens(command)+1) * sizeof(char*));   //+1 for null
 
@@ -85,9 +86,23 @@ int getTokenLocation(char *tokens[],char *string){
 
 }
 
-char **chopArray(char **originalArray,int size,int start,int end){
+int sizeOfArray(char **array){
+    int i = 0;
+    while(array[i]!=NULL){
+       i++;
+    }
+    return i;
+}
 
-   int stringLength = 30;
+void printArray(char **array){
+    int i = 0;
+    while(array[i]!=NULL){
+       printf("Array[%d] = %s\n",i,array[i]);
+       i++;
+    }
+}
+
+char **chopArray(char **originalArray,int size,int start,int end){
 
    char **newArray = malloc(sizeof(char*) * size);
    int i = 0; 
@@ -103,4 +118,32 @@ char **chopArray(char **originalArray,int size,int start,int end){
    return newArray;
 }
 
+char **mergeArray(char **leftSide, char **rightSide){
+
+   int leftSize = sizeOfArray(leftSide);
+   int rightSize = sizeOfArray(rightSide);
+   char **newArray = malloc(sizeof(char*) * (leftSize + rightSize));
+ 
+   int i = 0;
+//   if(leftSize > 0){
+      for(i = 0;i<leftSize;i++){
+         newArray[i] = malloc(sizeof(char) * stringLength);
+         newArray[i] = leftSide[i];
+  //    }
+   }
+
+//   if(rightSize > 0){
+
+      for(int j = 0;j<rightSize;j++){
+         newArray[i] = malloc(sizeof(char) * stringLength);
+         newArray[i] = rightSide[j];
+         i++;
+      }
+  // }
+
+   newArray[i] = NULL;
+
+   return newArray;
+
+}
 
