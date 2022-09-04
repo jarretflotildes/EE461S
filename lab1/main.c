@@ -52,22 +52,19 @@ int main(){
       //< will replace stdin with the file that is the next token
       //> will replace stdout with the file that is the next token
       //2> will replace stderr with the file that is the next token
-/*      if(strstr(command,"<")){
+      if(strstr(command,"<")){
          int location = getTokenLocation(tokens,"<");        
 	 stdInNextToken(tokens,tokenNum,location);
+      } else if(strstr(command,">")){
+            int location = getTokenLocation(tokens,">");        
+	    stdOutNextToken(tokens,tokenNum,location);
+      } else if(strstr(command,"2>")){
+            int location = getTokenLocation(tokens,"2>");
+            stdErrNextToken(tokens,tokenNum,location);
+      } else if(strstr(command,"|")){
+            int location = getTokenLocation(tokens,"|");        
+            pipeCommand(tokens,tokenNum,status,location);		
       } 
-      else*/ if(strstr(command,">")){
-         int location = getTokenLocation(tokens,">");        
-	 stdOutNextToken(tokens,tokenNum,location);
-      }
-
-/*
-//User wants to Pipe
- if(strstr(command,"|")){
-   int location = getTokenLocation(tokens,"|");        
-   pipeCommand(tokens,tokenNum,status,location);		
- } 
-*/  
 /* 
       //normal exec
       pid = fork();

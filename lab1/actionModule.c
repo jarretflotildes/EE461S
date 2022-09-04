@@ -55,6 +55,24 @@ void pipeCommand(char **tokens,int tokenNum,int status,int location){
 
 }
 
+//ONLY USE INSIDE CHILD PROCESS
+void redirectionChecks(char **tokens){
+
+    if(getLocationOfStringArray(tokens,">") != -1){
+        int location = getTokenLocation(tokens,">");        
+	stdOutNextToken(tokens,sizeOfArray(tokens),location);
+	exit(0);
+    }
+ 
+    if(getLocationOfStringArray(tokens,"<") != -1){
+        int location = getTokenLocation(tokens,"<");        
+	stdInNextToken(tokens,sizeOfArray(tokens),location);
+	exit(0);
+    }
+
+}
+
+
 //< will replace stdin with the file that is the next token
 void stdInNextToken(char **tokens,int tokenNum,int location){
         int fd = 0;
@@ -77,12 +95,8 @@ void stdInNextToken(char **tokens,int tokenNum,int location){
 	   fd = open(tokens[location+1],O_RDWR); //file is right after >         
            dup2(fd,0);
 	   
-	   if(getLocationOfStringArray(mergedArray,">")){
-              int location = getTokenLocation(mergedArray,">");        
-	      stdOutNextToken(mergedArray,sizeOfArray(mergedArray),location);
-              exit(0);
-	   }
-   	   
+	   redirectionChecks(mergedArray);
+      	   
            execvp(tokens[0],mergedArray);	
            exit(0);	 
 	}
@@ -104,25 +118,12 @@ void stdOutNextToken(char **tokens,int tokenNum,int location){
 	   char **leftSide = chopArray(tokens,location,0,location);
 	   char **rightSide = chopArray(tokens,tokenNum,location+2,tokenNum); //ignore > and file.txt
 	   char **mergedArray = mergeArray(leftSide,rightSide);
-//printf("size of left array is %d\n",sizeOfArray(leftSide));
-//printf("size of right array is %d\n",sizeOfArray(rightSide));
-//printf("size of merged array is %d\n",sizeOfArray(mergedArray));
-
-//printf("commandv args are \n");
-//  	   printArray(mergedArray); 
-//	 printf("\n");
-//  	  printArray(rightSide);
-	 //printArray(leftSide);
 	   fd = open(tokens[location+1],O_RDWR); //file is right after >         
            dup2(fd,1);
- 	   
-	   if(getLocationOfStringArray(mergedArray,">") != -1){
-              int location = getTokenLocation(mergedArray,">");        
-	      stdOutNextToken(mergedArray,sizeOfArray(mergedArray),location);
-	      exit(0);
- 	   }
- 
- 	   execvp(tokens[0],mergedArray);	
+ 	    
+	   redirectionChecks(mergedArray);
+      	   
+	   execvp(tokens[0],mergedArray);	
            exit(0);	 
 	}
 
@@ -132,4 +133,28 @@ void stdOutNextToken(char **tokens,int tokenNum,int location){
 
 }
 
+//2> will replace stderr with the file that is the next token
+void stdErrNextToken(char **tokens,int tokenNum,int location){
+        int fd = 0;
+ 
+	int status = 0;
+	pid_t pid = fork();
 
+	if(pid == 0){
+	   char **leftSide = chopArray(tokens,location,0,location);
+	   char **rightSide = chopArray(tokens,tokenNum,location+2,tokenNum); //ignore 2> and file.txt
+	   char **mergedArray = mergeArray(leftSide,rightSide);
+	   fd = open(tokens[location+1],O_RDWR); //file is right after 2>         
+           dup2(fd,2);
+ 	    
+	   redirectionChecks(mergedArray);
+      	   
+	   execvp(tokens[0],mergedArray);	
+           exit(0);	 
+	}
+
+        else { 
+           waitpid(pid,&status,0);	
+ 	}	
+
+}	
