@@ -1,18 +1,1 @@
-cat: j: No such file or directory
-onModule.o
-adsf
-b.txt
-in1.txt
-main.c
-main.o
-makefile
-parse.c
-parse.h
-parse.o
-pipe.c
-signals.c
-signals.h
-signals.o
-users
-wc
-yash
+cat: f: No such file or directory

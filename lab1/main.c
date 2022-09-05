@@ -30,8 +30,6 @@ int main(){
    int status = 0;
    int pipefd[2] = {0};
 	
-   mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
-
    int fd = 0;
    // 0. Register Signal Handlers
 
@@ -48,11 +46,6 @@ int main(){
       //3. Check for job control Token
       //4. Determine number of children processes to create (# times to call fork()) 
   
-      //check for redirections
-      //< will replace stdin with the file that is the next token
-      //> will replace stdout with the file that is the next token
-      //2> will replace stderr with the file that is the next token
-
       if(strstr(command,"2>")){
             int location = getTokenLocation(tokens,"2>");
             stdErrNextToken(tokens,tokenNum,location);
