@@ -60,38 +60,24 @@ void pipeCommand(char **tokens,int tokenNum,int status,int location){
 //ONLY USE INSIDE CHILD PROCESS
 void redirectionChecks(char **tokens){
 
-    //2> has to be checked before >
-    if(getLocationOfStringArray(tokens,"2>") != -1){
-        int location = getTokenLocation(tokens,"2>");        
-	stdErrNextToken(tokens,sizeOfArray(tokens),location);
-	exit(0);
+    char *redirection = findNextFileRedirection(tokens);
+    int tokenNum = sizeOfArray(tokens);
+
+    if(strcmp(redirection,"2>") == 0){
+         int location = getTokenLocation(tokens,"2>");
+         stdErrNextToken(tokens,tokenNum,location);
+	 exit(0);
+    } else if(strcmp(redirection,"<") == 0){
+         int location = getTokenLocation(tokens,"<");        
+	 stdInNextToken(tokens,tokenNum,location);
+	 exit(0);
+    } else if(strcmp(redirection,">") == 0){
+         int location = getTokenLocation(tokens,">");        
+	 stdOutNextToken(tokens,tokenNum,location);
+	 exit(0);
     }
 
-    if(getLocationOfStringArray(tokens,">") != -1){
-        int location = getTokenLocation(tokens,">");        
-	stdOutNextToken(tokens,sizeOfArray(tokens),location);
-	exit(0);
-    }
- 
-    if(getLocationOfStringArray(tokens,"<") != -1){
-        int location = getTokenLocation(tokens,"<");        
-	stdInNextToken(tokens,sizeOfArray(tokens),location);
-	exit(0);
-    }
 }
-
-void pipeCheck(char **tokens){
- 
-
-      if(getLocationOfStringArray(tokens,"|") != -1){
-         int location = getTokenLocation(tokens,"|");
-         int status = 0;	    
-         pipeCommand(tokens,sizeOfArray(tokens),status,location);		
-         exit(0);
-      } 
-}
-
-
 //< will replace stdin with the file that is the next token
 void stdInNextToken(char **tokens,int tokenNum,int location){
         int fd = 0;
@@ -102,13 +88,21 @@ void stdInNextToken(char **tokens,int tokenNum,int location){
 	if(pid == 0){
 	   char **leftSide = chopArray(tokens,location,0,location);
 	   char **rightSide = chopArray(tokens,tokenNum,location+2,tokenNum); //ignore < and file.txt
+//	   char **rightSide = chopArray(tokens,tokenNum,location+1,tokenNum); //ignore < and file.txt
+	
 	   char **mergedArray = mergeArray(leftSide,rightSide);
 
-	   fd = open(tokens[location+1],O_RDWR | O_TRUNC,mode); //file is right after >         
-           dup2(fd,0);
+	   fd = open(tokens[location+1],O_RDWR | O_TRUNC,mode); //file is right after <  
+          
+	   //failed to open file
+	   if(fd == -1){
+              exit(0);
+	   }
+	   	    
+	   dup2(fd,0);
 	   
 	   redirectionChecks(mergedArray);
-      	   
+	   
            execvp(tokens[0],mergedArray);	
            exit(0);	 
 	}
@@ -129,13 +123,16 @@ void stdOutNextToken(char **tokens,int tokenNum,int location){
 	if(pid == 0){
 	   char **leftSide = chopArray(tokens,location,0,location);
 	   char **rightSide = chopArray(tokens,tokenNum,location+2,tokenNum); //ignore > and file.txt
+//	   char **rightSide = chopArray(tokens,tokenNum,location+1,tokenNum); //ignore > and file.txt
 	   char **mergedArray = mergeArray(leftSide,rightSide);
 
-	   fd = open(tokens[location+1],O_RDWR | O_TRUNC,mode); //file is right after >         
-           dup2(fd,1);
+	   fd = open(tokens[location+1],O_RDWR | O_TRUNC | O_CREAT,mode); //file is right after >         
+           
+	  
+	   dup2(fd,1);
  	    
 	   redirectionChecks(mergedArray);
-      	   
+
 	   execvp(tokens[0],mergedArray);	
            exit(0);	 
 	}
@@ -156,14 +153,15 @@ void stdErrNextToken(char **tokens,int tokenNum,int location){
 	if(pid == 0){
 	   char **leftSide = chopArray(tokens,location,0,location);
 	   char **rightSide = chopArray(tokens,tokenNum,location+2,tokenNum); //ignore 2> and file.txt
+//	   char **rightSide = chopArray(tokens,tokenNum,location+1,tokenNum); //ignore 2> and file.txt
 	   char **mergedArray = mergeArray(leftSide,rightSide);
 	 
-	   fd = open(tokens[location+1],O_RDWR | O_TRUNC,mode); //file is right after >        
+	   fd = open(tokens[location+1],O_RDWR | O_TRUNC | O_CREAT,mode); //file is right after >        
 
 	   dup2(fd,2);
  	  
 	   redirectionChecks(mergedArray);
-      	   
+
 	   execvp(tokens[0],mergedArray);	
            exit(0);	 
 	}

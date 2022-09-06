@@ -45,22 +45,25 @@ int main(){
       int tokenNum = getNumberOfTokens(command);
       //3. Check for job control Token
       //4. Determine number of children processes to create (# times to call fork()) 
-  
-      if(strstr(command,"2>")){
-            int location = getTokenLocation(tokens,"2>");
-            stdErrNextToken(tokens,tokenNum,location);
-      } else if(strstr(command,"<")){
-            int location = getTokenLocation(tokens,"<");        
-	    stdInNextToken(tokens,tokenNum,location);
-      } else if(strstr(command,">")){
-            int location = getTokenLocation(tokens,">");        
-	    stdOutNextToken(tokens,tokenNum,location);
-      }else if(strstr(command,"|")){
+
+      
+      
+      /*      char *redirection = findNextFileRedirection(tokens);
+     
+      if(strcmp(redirection,"|") == 0){
             int location = getTokenLocation(tokens,"|");        
             pipeCommand(tokens,tokenNum,status,location);		
-      } 
-      else { 
-         //normal exec
+      } else if(strcmp(redirection,"2>") == 0){
+            int location = getTokenLocation(tokens,"2>");
+            stdErrNextToken(tokens,tokenNum,location);
+      } else if(strcmp(redirection,"<") == 0){
+            int location = getTokenLocation(tokens,"<");        
+	    stdInNextToken(tokens,tokenNum,location);
+      } else if(strcmp(redirection,">") == 0){
+            int location = getTokenLocation(tokens,">");        
+	    stdOutNextToken(tokens,tokenNum,location);
+      } else  {
+	 //normal exec
          pid = fork();
          // 5. execute commands using execvp or execlp   
          if(pid == 0){
@@ -68,9 +71,11 @@ int main(){
 	    exit(0);
          } 
          wait((int*)NULL); //wait for any child
-      }
-
+     }
+*/
       // 6. Other commands for job stuff
+      
+      
       freeParseCommand(tokens,tokenNum);
       free(command);
 

@@ -134,6 +134,56 @@ char **chopArray(char **originalArray,int size,int start,int end){
    return newArray;
 }
 
+//find character of next redirection if there is one
+// < > 2> | 
+//Output: character of next redirection 
+char *findNextFileRedirection(char **array){
+
+   int redirection = sizeOfArray(array); 
+   char *string = "Nothing found"; 
+
+   for(int i = 0;i<sizeOfArray(array);i++){
+      if(strcmp(array[i],"2>") == 0){
+          string = "2>";
+	  redirection = getTokenLocation(array,string);
+          break;  
+       }
+   }
+
+
+   for(int i = 0;i<sizeOfArray(array);i++){
+      if(strcmp(array[i],"<") == 0){
+	 if(redirection > getTokenLocation(array,"<")){
+	    string = "<";
+	    redirection = getTokenLocation(array,string);
+	 }
+         break;
+      }
+   }
+
+   for(int i = 0;i<sizeOfArray(array);i++){
+      if(strcmp(array[i],">") == 0){
+	 if(redirection > getTokenLocation(array,">")){
+	    string = ">";
+	    redirection = getTokenLocation(array,string);
+	 }
+         break;
+      }		      
+   }
+
+   //pipes take priority
+   for(int i = 0;i<sizeOfArray(array);i++){
+       if(strcmp(array[i],"|") == 0){
+           string = "|";
+	   break;  
+       }
+   }
+
+   return string;
+
+}
+
+
 char **mergeArray(char **leftSide, char **rightSide){
 
    int leftSize = sizeOfArray(leftSide);
@@ -162,4 +212,6 @@ char **mergeArray(char **leftSide, char **rightSide){
    return newArray;
 
 }
+
+
 
