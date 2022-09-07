@@ -115,7 +115,7 @@ int jobsCommandCheck(char *command){
    int jobFlag = FALSE;
    if(strcmp(command,"jobs") == 0 ||
       strcmp(command,"fg") == 0  || 
-     // strstr(command,"&") || 
+    //  strstr(command,"&") || 
       strcmp(command,"bg") == 0){
 
       jobFlag = TRUE;
@@ -123,4 +123,27 @@ int jobsCommandCheck(char *command){
 //printf("jobsFlag is %d\n",jobFlag);
    return jobFlag;
 			   
+}
+
+void executeJobs(char *command,char **tokens,jobStack *stack){
+
+
+   if(strcmp(command,"jobs") == 0){
+      printf("these are the jobs\n");
+      printStack();
+   }    
+
+   if(strcmp(command,"fg") == 0){
+      printf("this is fg\n");
+   }
+
+   if(strcmp(command,"bg") == 0){
+      printf("this is bg\n");
+   }
+
+   //need better way to check for &
+   if(strstr(command,"&")){
+      printf("this contains &\n");
+   }
+
 }

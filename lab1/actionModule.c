@@ -10,6 +10,36 @@
 
 #define mode S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH
 
+void executeCommand(char **tokens,int tokenNum,int status,pid_t pid){
+ 
+ 	 char *redirection = findNextFileRedirection(tokens);
+      
+         if(strcmp(redirection,"|") == 0){
+               int location = getTokenLocation(tokens,"|");        
+               pipeCommand(tokens,tokenNum,status,location);		
+         } else if(strcmp(redirection,"2>") == 0){
+               int location = getTokenLocation(tokens,"2>");
+               stdErrNextToken(tokens,tokenNum,location);
+         } else if(strcmp(redirection,"<") == 0){
+               int location = getTokenLocation(tokens,"<");        
+	       stdInNextToken(tokens,tokenNum,location);
+         } else if(strcmp(redirection,">") == 0){
+               int location = getTokenLocation(tokens,">");        
+   	       stdOutNextToken(tokens,tokenNum,location);
+         } else  {
+   	     //normal exec
+             pid = fork();
+             // 5. execute commands using execvp or execlp   
+             if(pid == 0){
+                execvp(tokens[0],tokens);// first in array is always command
+	        exit(0);
+             } else {
+                waitpid(pid,&status,0);
+	     }
+	 }
+}
+
+
 void pipeCommand(char **tokens,int tokenNum,int status,int location){
 
 	int stringLength = 30;
@@ -78,6 +108,7 @@ void redirectionChecks(char **tokens){
     }
 
 }
+
 //< will replace stdin with the file that is the next token
 void stdInNextToken(char **tokens,int tokenNum,int location){
         int fd = 0;

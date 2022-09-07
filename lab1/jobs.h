@@ -16,4 +16,7 @@ int getStackSize();
 int getHighestJobNum();
 void printStack();
 
-int jobsCommandCheck(char *command); 
+int jobsCommandCheck(char *command);
+void executeJobs(char *command,char **tokens,jobStack *stack);
+
+
