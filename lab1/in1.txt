@@ -1,10 +1,23 @@
-asdf
-asdf
-a
-sdf
-asdf
-
-asdf
-asfd
-
-
+total 180
+rwrr 1 glad glad     8 Sep  6 14:12 a.txt
+rwrr 1 glad glad  4589 Sep  6 14:11 actionModule.c
+rwrr 1 glad glad   302 Sep  6 14:11 actionModule.h
+rwrr 1 glad glad 13640 Sep  6 14:11 actionModule.o
+rwrr 1 glad glad    33 Sep  6 19:00 b.txt
+rwrr 1 glad glad     0 Sep  5 12:50 c.txt
+rwrr 1 glad glad    33 Sep  6 14:10 error.txt
+rwrr 1 glad glad     0 Sep  6 19:03 in1.txt
+rwrr 1 glad glad  1463 Sep  6 18:58 jobs.c
+rwrr 1 glad glad   239 Sep  6 18:57 jobs.h
+rwrr 1 glad glad 18184 Sep  6 18:58 jobs.o
+rwrr 1 glad glad  2067 Sep  6 18:59 main.c
+rwrr 1 glad glad 18632 Sep  6 18:59 main.o
+rwrr 1 glad glad   402 Sep  5 19:48 makefile
+rwrr 1 glad glad  4047 Sep  5 18:59 parse.c
+rwrr 1 glad glad   467 Sep  5 14:16 parse.h
+rwrr 1 glad glad 14120 Sep  5 18:59 parse.o
+rwrr 1 glad glad   814 Sep  1 21:07 pipe.c
+rwrr 1 glad glad   523 Sep  5 19:48 signals.c
+rwrr 1 glad glad     2 Sep  2 19:17 signals.h
+rwrr 1 glad glad  3776 Sep  5 19:48 signals.o
+rwxrxrx 1 glad glad 43624 Sep  6 18:59 yash

@@ -18,6 +18,7 @@
 #include "parse.h"
 #include "actionModule.h"
 #include "signals.h"
+#include "jobs.h"
 
 int main(){
 	
@@ -31,6 +32,9 @@ int main(){
    int pipefd[2] = {0};
 	
    int fd = 0;
+
+   jobStack *stack = makeStack();
+
    // 0. Register Signal Handlers
 
 
@@ -45,10 +49,9 @@ int main(){
       int tokenNum = getNumberOfTokens(command);
       //3. Check for job control Token
       //4. Determine number of children processes to create (# times to call fork()) 
-
+     
       
-      
-      /*      char *redirection = findNextFileRedirection(tokens);
+      char *redirection = findNextFileRedirection(tokens);
      
       if(strcmp(redirection,"|") == 0){
             int location = getTokenLocation(tokens,"|");        
@@ -72,7 +75,7 @@ int main(){
          } 
          wait((int*)NULL); //wait for any child
      }
-*/
+
       // 6. Other commands for job stuff
       
       
