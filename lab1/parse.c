@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include "parse.h"
 
-#define stringLength 30
+#define STRINGLENGTH 30
 
 char **parseCommand(char *command){ 
 
@@ -22,7 +22,7 @@ char **parseCommand(char *command){
       int i = 0;
 
       while((token = strtok_r(commandCopy," ", &savePtr))){
-        tokens[i] = malloc(stringLength + sizeof(char));
+        tokens[i] = malloc(STRINGLENGTH + sizeof(char));
         strcpy(tokens[i],token);
 	commandCopy = NULL;
         i++;
@@ -122,7 +122,7 @@ char **chopArray(char **originalArray,int size,int start,int end){
    int i = 0; 
  
    for(int j = start;j<end;j++){
-      newArray[i] = malloc(sizeof(char) * stringLength);
+      newArray[i] = malloc(sizeof(char) * STRINGLENGTH);
       newArray[i] = originalArray[j];
       i++;
    }
@@ -190,12 +190,12 @@ char **mergeArray(char **leftSide, char **rightSide){
  
    int i = 0;
    for(i = 0;i<leftSize;i++){
-      newArray[i] = malloc(sizeof(char) * stringLength);
+      newArray[i] = malloc(sizeof(char) * STRINGLENGTH);
       newArray[i] = leftSide[i];
    }
 
    for(int j = 0;j<rightSize;j++){
-      newArray[i] = malloc(sizeof(char) * stringLength);
+      newArray[i] = malloc(sizeof(char) * STRINGLENGTH);
       newArray[i] = rightSide[j];
       i++;
    }

@@ -21,7 +21,6 @@
 #include "signals.h"
 #include "jobs.h"
 
-#define FALSE 0
 
 int main(){
 	
@@ -46,8 +45,8 @@ printf("yash pid is %d\n",yashPid);
 
    saveYash(yashPid);
 push(0,0,"hello");
-
-
+push(1,1,"bye");
+printStack();
    while(1){
 
       // 1. Print prompt
@@ -60,7 +59,6 @@ push(0,0,"hello");
          break;
       }
 
-
       // 2. Grab and parse input - remove newLine modifier (\n)  
       //    each token will be no more than 30 characters 
       char **tokens = parseCommand(command);
@@ -68,11 +66,10 @@ push(0,0,"hello");
 
       //3. Check for job control Token
       
-      if(jobsCommandCheck(command) == FALSE){
+      if(!jobsCommandCheck(command)){
      
          //4. Determine number of children processes to create (# times to call fork()) 
-      
-         //child block act as process control parent 
+               //child block act as process control parent 
          pgid = fork();
 	 if(pgid == 0){ 
 	    executeCommand(tokens,tokenNum,status,pid); 

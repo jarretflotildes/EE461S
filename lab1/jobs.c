@@ -9,8 +9,6 @@
 
 #include "jobs.h"
 
-#define TRUE 1
-#define FALSE 0
 
 /*
 typedef struct jobStack { 
@@ -54,18 +52,10 @@ jobStack pop(){
 
    jobStack *poppedNodePtr = MyStack;
    jobStack poppedNode = *poppedNodePtr;   
-
+ 
    MyStack = MyStack->next;
    
    free(poppedNodePtr);
-   
-   //decrement jobnum of everything in stack
-//   jobStack *ptr = MyStack;
-//   while(ptr->next != NULL){
-//      ptr->jobNum = ptr->jobNum--;
-//      ptr = ptr->next;
- //  }
-
 
    return poppedNode;
 
@@ -74,7 +64,8 @@ int getStackSize(){
 
    int count = 0;
    jobStack *ptr = MyStack;
-   while(ptr->next != NULL){
+
+   while(ptr != NULL && ptr->next != NULL){
       ptr = ptr->next;
       count++;
    }
@@ -99,26 +90,31 @@ int getHighestJobNum(){
 
 void printStack(){
 
-   jobStack *ptr = MyStack;
-   while(ptr->next != NULL){
-      //printf("stack position is at %d with pgid %d with status %d\n",ptr->jobNum,ptr->pgid,ptr->status);
-      //TODO add +/- and if running/stopped/etc
-      printf("[%d]                     %s\n",ptr->jobNum,ptr->command);
-      ptr = ptr->next;
+   if(MyStack->next == NULL){
+      return;
    }
+
+   jobStack ptr = pop();
+ 
+   printStack();
+  
+   printf("[%d]                     %s\n",ptr.jobNum,ptr.command);
+
+   push(ptr.pgid,ptr.status,ptr.command);
+
 
 }
 
 
 //commands are jobs,&,fg,bg
 int jobsCommandCheck(char *command){
-   int jobFlag = FALSE;
+   int jobFlag = 0;
    if(strcmp(command,"jobs") == 0 ||
       strcmp(command,"fg") == 0  || 
     //  strstr(command,"&") || 
       strcmp(command,"bg") == 0){
 
-      jobFlag = TRUE;
+      jobFlag = 1;
    }
 //printf("jobsFlag is %d\n",jobFlag);
    return jobFlag;
