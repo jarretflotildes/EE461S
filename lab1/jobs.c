@@ -8,31 +8,43 @@
 #include <readline/history.h>
 
 #include "jobs.h"
+
+#define TRUE 1
+#define FALSE 0
+
 /*
 typedef struct jobStack { 
     pid_t pgid; 
     int status;
     int jobNum;
+    string *command;
     struct jobStack *next;
 
 } jobStack;
 */
 jobStack *MyStack;
 
-//Gives pointer to empty stack
+//Initializes MyStack pointer to empty stack
+//Only call once
 jobStack *makeStack(){
    MyStack = (jobStack *)malloc(sizeof(jobStack));
    MyStack->next = NULL;
    return MyStack;
 }
 
-void push(pid_t pgid,int status){
+void push(pid_t pgid,int status,char *command){
    jobStack *stack = (jobStack *)malloc(sizeof(jobStack));
    stack->next = MyStack;
    stack->pgid = pgid;
-   stack->jobNum = getStackSize() + 1;
-  
-   
+
+   if(getStackSize()==0){ //empty stack first job in stack
+      stack->jobNum = 1;
+   } else { 
+      stack->jobNum = getHighestJobNum();  
+   }
+
+   stack->command = command;
+
    MyStack = stack;
    
 }
@@ -48,11 +60,11 @@ jobStack pop(){
    free(poppedNodePtr);
    
    //decrement jobnum of everything in stack
-   jobStack *ptr = MyStack;
-   while(ptr->next != NULL){
-      ptr->jobNum = ptr->jobNum--;
-      ptr = ptr->next;
-   }
+//   jobStack *ptr = MyStack;
+//   while(ptr->next != NULL){
+//      ptr->jobNum = ptr->jobNum--;
+//      ptr = ptr->next;
+ //  }
 
 
    return poppedNode;
@@ -71,14 +83,43 @@ int getStackSize(){
 
 }
 
-void printStack(){
+int getHighestJobNum(){
+   int highest = 1;
+   
    jobStack *ptr = MyStack;
    while(ptr->next != NULL){
-      printf("stack position is at %d with pgid %d with status %d\n",ptr->jobNum,ptr->pgid,ptr->status);
+      if(ptr->jobNum >= highest){
+         highest = ptr->jobNum + 1;
+      }
+      ptr = ptr->next;
+   }
+
+   return highest;
+}
+
+void printStack(){
+
+   jobStack *ptr = MyStack;
+   while(ptr->next != NULL){
+      //printf("stack position is at %d with pgid %d with status %d\n",ptr->jobNum,ptr->pgid,ptr->status);
+      //TODO add +/- and if running/stopped/etc
+      printf("[%d]                     %s\n",ptr->jobNum,ptr->command);
       ptr = ptr->next;
    }
 
 }
 
 
+//commands are jobs,&,fg,bg
+int jobsCommandCheck(char *command){
+   int jobFlag = FALSE;
+   if(strcmp(command,"jobs") == 0 ||
+      strcmp(command,"fg") == 0  || 
+      strcmp(command,"bg") == 0){
 
+      jobFlag = TRUE;
+   }
+//printf("jobsFlag is %d\n",jobFlag);
+   return jobFlag;
+			   
+}
