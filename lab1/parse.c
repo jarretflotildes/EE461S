@@ -6,7 +6,6 @@
 
 #define stringLength 30
 
-
 char **parseCommand(char *command){ 
 
       char **tokens;
@@ -33,7 +32,6 @@ char **parseCommand(char *command){
  
       tokens[i] = NULL;
 
-     
       return tokens;
 }
 
@@ -191,21 +189,16 @@ char **mergeArray(char **leftSide, char **rightSide){
    char **newArray = malloc(sizeof(char*) * (leftSize + rightSize));
  
    int i = 0;
-//   if(leftSize > 0){
-      for(i = 0;i<leftSize;i++){
-         newArray[i] = malloc(sizeof(char) * stringLength);
-         newArray[i] = leftSide[i];
-  //    }
+   for(i = 0;i<leftSize;i++){
+      newArray[i] = malloc(sizeof(char) * stringLength);
+      newArray[i] = leftSide[i];
    }
 
-//   if(rightSize > 0){
-
-      for(int j = 0;j<rightSize;j++){
-         newArray[i] = malloc(sizeof(char) * stringLength);
-         newArray[i] = rightSide[j];
-         i++;
-      }
-  // }
+   for(int j = 0;j<rightSize;j++){
+      newArray[i] = malloc(sizeof(char) * stringLength);
+      newArray[i] = rightSide[j];
+      i++;
+   }
 
    newArray[i] = NULL;
 

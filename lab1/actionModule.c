@@ -88,7 +88,6 @@ void stdInNextToken(char **tokens,int tokenNum,int location){
 	if(pid == 0){
 	   char **leftSide = chopArray(tokens,location,0,location);
 	   char **rightSide = chopArray(tokens,tokenNum,location+2,tokenNum); //ignore < and file.txt
-//	   char **rightSide = chopArray(tokens,tokenNum,location+1,tokenNum); //ignore < and file.txt
 	
 	   char **mergedArray = mergeArray(leftSide,rightSide);
 
@@ -123,7 +122,6 @@ void stdOutNextToken(char **tokens,int tokenNum,int location){
 	if(pid == 0){
 	   char **leftSide = chopArray(tokens,location,0,location);
 	   char **rightSide = chopArray(tokens,tokenNum,location+2,tokenNum); //ignore > and file.txt
-//	   char **rightSide = chopArray(tokens,tokenNum,location+1,tokenNum); //ignore > and file.txt
 	   char **mergedArray = mergeArray(leftSide,rightSide);
 
 	   fd = open(tokens[location+1],O_RDWR | O_TRUNC | O_CREAT,mode); //file is right after >         
@@ -153,7 +151,6 @@ void stdErrNextToken(char **tokens,int tokenNum,int location){
 	if(pid == 0){
 	   char **leftSide = chopArray(tokens,location,0,location);
 	   char **rightSide = chopArray(tokens,tokenNum,location+2,tokenNum); //ignore 2> and file.txt
-//	   char **rightSide = chopArray(tokens,tokenNum,location+1,tokenNum); //ignore 2> and file.txt
 	   char **mergedArray = mergeArray(leftSide,rightSide);
 	 
 	   fd = open(tokens[location+1],O_RDWR | O_TRUNC | O_CREAT,mode); //file is right after >        

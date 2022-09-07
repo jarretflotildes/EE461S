@@ -115,6 +115,7 @@ int jobsCommandCheck(char *command){
    int jobFlag = FALSE;
    if(strcmp(command,"jobs") == 0 ||
       strcmp(command,"fg") == 0  || 
+     // strstr(command,"&") || 
       strcmp(command,"bg") == 0){
 
       jobFlag = TRUE;

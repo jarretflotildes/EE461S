@@ -105,7 +105,7 @@ printStack();
             printf("this is bg\n");
 	 }
 
-	 if(strcmp(command,"&") == 0){
+	 if(strstr(command,"&")){
             printf("this contains &\n");
 	 }
       }
