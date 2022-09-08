@@ -19,8 +19,7 @@
 #include "parse.h"
 #include "actionModule.h"
 #include "signals.h"
-#include "jobs.h"
-
+//jobs.h in signals.h
 
 int main(){
 	
@@ -28,33 +27,31 @@ int main(){
 
    char *command;  
 
-   pid_t pid = -1;
    pid_t pgid = -1;
-
+   pid_t newPgid = 0;
+ 
    int status = 0;
    int pipefd[2] = {0};
 	
    int fd = 0;
 
-   jobStack *stack = makeStack();
+   jobStack *stackPtr = makeStack();
+   pid_t yashPid = tcgetpgrp(STDIN_FILENO);
+
+   setSignalJobStack(stackPtr);
+   saveYash(yashPid);
 
    // 0. Register Signal Handlers
    registerSignals();
-   pid_t yashPid = tcgetpgrp(0);
-printf("yash pid is %d\n",yashPid);
-
-   saveYash(yashPid);
-push(0,0,"hello");
-push(1,1,"bye");
-printStack();
+  
    while(1){
 
       // 1. Print prompt
       command = readline("# "); 
     
-      //Ctrl-d will exit the shell
+      //Ctrl-d (EOF) will exit the shell 
       if(command == NULL){
-         free(stack);
+         free(stackPtr);
          printf("\n");
          break;
       }
@@ -66,21 +63,33 @@ printStack();
 
       //3. Check for job control Token
       
-      if(!jobsCommandCheck(command)){
+      if(!jobsCommandCheck(command,tokens)){
      
          //4. Determine number of children processes to create (# times to call fork()) 
-               //child block act as process control parent 
+
+	 //   Child block act as process control parent 
          pgid = fork();
-	 if(pgid == 0){ 
-	    executeCommand(tokens,tokenNum,status,pid); 
-            exit(0);	    
+	 newPgid++;
+	 push(pgid,status,command);
+
+	 if(pgid == 0){
+       	    pgid = newPgid;
+	    tcsetpgrp(STDIN_FILENO,pgid);
+            // 5. execute commands using execvp or execlp   
+	    executeCommand(tokens,tokenNum,status,pgid);
+	    tcsetpgrp(STDIN_FILENO,yashPid);
+//printf("Child pgrp is %d\n",pgid);
+	    exit(0);	    
 	 } else {
-           waitpid(pgid,&status,WUNTRACED); 
+//printf("Parent pgrp is %d\n",yashPid);	
+	    waitpid(pgid,&status,WUNTRACED); 
+	    pop();
+ 
 	 }
 
       } else {
          // 6. Other commands for job stuff
-         executeJobs(command,tokens,stack); 
+         executeJobs(command,tokens,stackPtr); 
       }
 
       freeParseCommand(tokens,tokenNum);

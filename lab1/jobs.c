@@ -8,7 +8,7 @@
 #include <readline/history.h>
 
 #include "jobs.h"
-
+#include "parse.h"
 
 /*
 typedef struct jobStack { 
@@ -107,11 +107,11 @@ void printStack(){
 
 
 //commands are jobs,&,fg,bg
-int jobsCommandCheck(char *command){
+int jobsCommandCheck(char *command,char **tokens){
    int jobFlag = 0;
    if(strcmp(command,"jobs") == 0 ||
       strcmp(command,"fg") == 0  || 
-    //  strstr(command,"&") || 
+      strcmp(tokens[sizeOfArray(tokens)-1],"&") == 0 || 
       strcmp(command,"bg") == 0){
 
       jobFlag = 1;
@@ -136,9 +136,9 @@ void executeJobs(char *command,char **tokens,jobStack *stack){
    if(strcmp(command,"bg") == 0){
       printf("this is bg\n");
    }
-
-   //need better way to check for &
-   if(strstr(command,"&")){
+ 
+ 
+   if(strcmp(tokens[sizeOfArray(tokens)-1],"&") == 0){
       printf("this contains &\n");
    }
 

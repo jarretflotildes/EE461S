@@ -4,7 +4,6 @@
 #include <stdio.h>
 
 #include "signals.h"
-#include "jobs.h"
 
 /*Signals (SIGINT, SIGTSTP, SIGCHLD)
 	   -  Ctrl-c must quit current foreground process (if one exists) and not the shell
@@ -15,6 +14,7 @@
 */
 
 pid_t YashPid;
+jobStack *myStackPtr;
 
 void registerSignals(){
 
@@ -26,7 +26,15 @@ void registerSignals(){
    //^Z
    if(signal(SIGTSTP,sig_stp) == SIG_ERR){
       printf("signal(SIGSTP) error");
-   }	
+   }
+
+   if(signal(SIGCHLD,sig_chld) == SIG_ERR){
+      printf("signal (SIGCHLD) error");
+   }   
+
+//   if(signal(SIGKILL,sig_kill) == SIG_ERR){
+  //    printf("signal(SIGKILL) error");
+  // }
 
 }
 
@@ -34,21 +42,48 @@ void saveYash(pid_t yash){
    YashPid = yash;
 }
 
+void setSignalJobStack(jobStack *myStack){
+   myStackPtr = myStack;
+}
 
 //signal handlers
 
 //-  Ctrl-c must quit current foreground process (if one exists) and not the shell
 //and should not print the process (unlike bash)
 static void sig_int(int signo) {
- 
+//printStack();
+    if(getStackSize() == 0 && tcgetpgrp(STDIN_FILENO) == YashPid){
+        printf("\n# ");
+    } else {
+//       pop();
+       tcsetpgrp(STDIN_FILENO,YashPid);
+    }
 }
 //- Ctrl-z must send SIGTSTP to the current foreground process and should not
 //print the process (unlike bash)
 //- The shell will not be stopped on SIGTSTP
 static void sig_stp(int signo){
-  //stop current foreground process and add to job stack
-  
-  pause();  
+  if(tcgetpgrp(STDIN_FILENO) == YashPid){
+     //set current pgrp to yash
+     tcsetpgrp(STDIN_FILENO,YashPid);
+  } else {
+     //stop current foreground process and add to job stack
+     printf("ehl");
+     pause();
+ }
+
 }
+
+static void sig_chld(int signo){
+
+}
+
+static void sig_kill(int signo){
+
+
+}
+
+
+
 
 
