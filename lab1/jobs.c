@@ -10,6 +10,7 @@
 #include "jobs.h"
 #include "parse.h"
 
+#define MAXSIZE 20
 /*
 typedef struct jobStack { 
     pid_t pgid; 
@@ -25,10 +26,18 @@ jobStack *MyStack;
 //Initializes MyStack pointer to empty stack
 //Only call once
 jobStack *makeStack(){
-   MyStack = (jobStack *)malloc(sizeof(jobStack));
-   MyStack->next = NULL;
    MyStack = NULL;
    return MyStack;
+}
+
+void freeStack(){
+
+   while(MyStack!=NULL){
+      pop();
+   }
+
+   free(MyStack);
+
 }
 
 void push(pid_t pgid,int status,char *command){
@@ -96,13 +105,25 @@ void printStack(){
    }
 
    jobStack ptr = pop();
- 
    printStack();
-  
    printf("[%d]                     %s\n",ptr.jobNum,ptr.command);
-
    push(ptr.pgid,ptr.status,ptr.command);
+}
 
+void printFinishedJobs(){
+   if(MyStack == NULL){
+      return;
+   }
+
+   jobStack ptr = pop();
+   printFinishedJobs();
+   //if done print job
+   if(ptr.status == -1){
+      printf("[%d]                     %s\n",ptr.jobNum,ptr.command);
+      MyStack = ptr.next;
+   }else{
+      push(ptr.pgid,ptr.status,ptr.command);
+   }
 
 }
 
@@ -111,8 +132,12 @@ void printStack(){
 int jobsCommandCheck(char *command,char **tokens){
    int jobFlag = 0;
 
-   //TODO add check in case of empty array maybe idk
-   
+   //user just entered \n character
+   if(sizeOfArray(tokens) == 0){
+      return jobFlag;
+   }
+
+
    if(strcmp(command,"jobs") == 0 ||
       strcmp(command,"fg") == 0  || 
       strcmp(tokens[sizeOfArray(tokens)-1],"&") == 0 || 
@@ -127,6 +152,10 @@ int jobsCommandCheck(char *command,char **tokens){
 
 void executeJobs(char *command,char **tokens,jobStack *stack){
 
+   //user just entered \n character
+   if(sizeOfArray(tokens) == 0){
+      return;
+   }
 
    if(strcmp(command,"jobs") == 0){
       printf("these are the jobs\n");
@@ -141,9 +170,10 @@ void executeJobs(char *command,char **tokens,jobStack *stack){
       printf("this is bg\n");
    }
  
- 
-   if(strcmp(tokens[sizeOfArray(tokens)-1],"&") == 0){
-      printf("this contains &\n");
+   if(sizeOfArray(tokens) > 0){
+      if(strcmp(tokens[sizeOfArray(tokens)-1],"&") == 0){
+         printf("this contains &\n");
+      }
    }
 
 }

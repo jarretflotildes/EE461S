@@ -48,15 +48,16 @@ pop();
 printf("popped\n");
 printStack();
 printf("size of stack is %d\n",getStackSize());
-*/ 
+*/
    while(1){
 
       // 1. Print prompt
+      
       command = readline("# "); 
 
       //Ctrl-d (EOF) will exit the shell 
       if(command == NULL){
-	 free(stackPtr);
+	 freeStack();
          printf("\n");
 	 break;
       }
@@ -68,33 +69,31 @@ printf("size of stack is %d\n",getStackSize());
 
       //3. Check for job control Token
       
-      if(!jobsCommandCheck(command,tokens)){
+      if(command != "\n" && !jobsCommandCheck(command,tokens)){
      
          //4. Determine number of children processes to create (# times to call fork()) 
 
 	 //   Child block act as process control parent 
          pid = fork();
-
-         push(pid,status,command);
-	 
+	
 	 if(pid == 0){
             // 5. execute commands using execvp or execlp   
-   	   
-	//TODO FIX THIS, PGID SETPGID MESSES UP MORE COMMAND FOR SOME REASON	
-            setpgid(getpid(),getpid()); //turn self into new process group
-	    executeCommand(tokens,tokenNum,status,getpid());
-	    exit(0);	    
+  	 //Maybe FIX THIS, PGID SETPGID MESSES UP "MORE" COMMAND FOR SOME REASON;only command that seems to fail
+//	    int setStatus = tcsetpgrp(1,childPid);
+            pid_t childPid = getpid();
+      	    //setpgid(0,0);
+	    executeCommand(tokens,tokenNum,status,childPid);
+            exit(0);	    
 	 } else {
-
      	    //TODO ADD WAY TO CONTINUE IF CHLD DIED AND DONT POP IF CHLD DIED 
-	    push(pid,status,command);
-	    
-            waitpid(pid,&status,WUNTRACED); 
+    	    push(pid,status,command);
+//	    setpgid(pid,0); //turn child into new process group
+	    waitpid(pid,&status,WUNTRACED); 
+//	    int setStatus = tcsetpgrp(1,yashPid);
 	    pop();
-	    tcsetpgrp(STDIN_FILENO,yashPid);
 	 }
 
-      } else {
+      } else{
          // 6. Other commands for job stuff
          executeJobs(command,tokens,stackPtr); 
 

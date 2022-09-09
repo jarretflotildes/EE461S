@@ -10,11 +10,13 @@ typedef struct jobStack {
 } jobStack;
 
 jobStack *makeStack();
+void freeStack();
 void push(pid_t pgid,int status,char *command);
 jobStack pop();
 int getStackSize();
 int getHighestJobNum();
 void printStack();
+void printFinishedJobs();
 
 int jobsCommandCheck(char *command,char **tokens);
 void executeJobs(char *command,char **tokens,jobStack *stack);

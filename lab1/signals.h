@@ -8,4 +8,3 @@ void setSignalJobStack(jobStack *myStack);
 static void sig_int(int signo);
 static void sig_stp(int signo);
 static void sig_chld(int signo);
-static void sig_kill(int signo);
