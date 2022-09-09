@@ -79,13 +79,16 @@ printf("size of stack is %d\n",getStackSize());
 	 
 	 if(pid == 0){
             // 5. execute commands using execvp or execlp   
-   	    setpgid(getpid(),getpid()); //turn self into new process group
+   	   
+	//TODO FIX THIS, PGID SETPGID MESSES UP MORE COMMAND FOR SOME REASON	
+            setpgid(getpid(),getpid()); //turn self into new process group
 	    executeCommand(tokens,tokenNum,status,getpid());
 	    exit(0);	    
 	 } else {
 
      	    //TODO ADD WAY TO CONTINUE IF CHLD DIED AND DONT POP IF CHLD DIED 
 	    push(pid,status,command);
+	    
             waitpid(pid,&status,WUNTRACED); 
 	    pop();
 	    tcsetpgrp(STDIN_FILENO,yashPid);
