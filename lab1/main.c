@@ -53,7 +53,6 @@ printf("size of stack is %d\n",getStackSize());
 
       // 1. Print prompt
       command = readline("# "); 
-  
 
       //Ctrl-d (EOF) will exit the shell 
       if(command == NULL){
@@ -75,26 +74,27 @@ printf("size of stack is %d\n",getStackSize());
 
 	 //   Child block act as process control parent 
          pid = fork();
-	 push(pid,status,command);
 
+         push(pid,status,command);
+	 
 	 if(pid == 0){
             // 5. execute commands using execvp or execlp   
    	    setpgid(getpid(),getpid()); //turn self into new process group
-//printf("pgid is %d\n",getpgid(0));
 	    executeCommand(tokens,tokenNum,status,getpid());
 	    exit(0);	    
 	 } else {
-//printf("parent pgid is %d\n",getpgid(0));	
-            //TODO ADD WAY TO CONTINUE IF CHLD DIED AND DONT POP IF CHLD DIED 
-   	    waitpid(pid,&status,WUNTRACED); 
-printStack();
-	    //	    pop();
-//	    tcsetpgrp(STDIN_FILENO,yashPid);
+
+     	    //TODO ADD WAY TO CONTINUE IF CHLD DIED AND DONT POP IF CHLD DIED 
+	    push(pid,status,command);
+            waitpid(pid,&status,WUNTRACED); 
+	    pop();
+	    tcsetpgrp(STDIN_FILENO,yashPid);
 	 }
 
       } else {
          // 6. Other commands for job stuff
          executeJobs(command,tokens,stackPtr); 
+
       }
 
       freeParseCommand(tokens,tokenNum);

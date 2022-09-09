@@ -34,7 +34,8 @@ void executeCommand(char **tokens,int tokenNum,int status,pid_t pid){
                 execvp(tokens[0],tokens);// first in array is always command
 	        exit(0);
              } else {
-                waitpid(pid,&status,0);
+//printf("execute command wait pgid is %d\n",getpgid(0)); 
+   	        waitpid(pid,&status,0);
 	     }
 	 }
 }

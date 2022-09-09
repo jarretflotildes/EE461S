@@ -51,20 +51,11 @@ void setSignalJobStack(jobStack *myStack){
 //-  Ctrl-c must quit current foreground process (if one exists) and not the shell
 //and should not print the process (unlike bash)
 static void sig_int(int signo) {
-//printStack();
     if(getpgid(STDIN_FILENO) == YashPid && getStackSize() == 0){
  	printf("\n# ");
-    }
-    if(getpgid(STDIN_FILENO) == YashPid){
+    } else if(getpgid(STDIN_FILENO) == YashPid){
 	jobStack node = pop();
-printStack();
-printf("about to kill %d\n",node.pgid);
 	kill(-1*node.pgid,signo);
-    } else {
-//       pop();
-//       printf("pid is %d\n",getpid());
-       
-       kill(-1*getpid(),signo);
     }
 }
 //- Ctrl-z must send SIGTSTP to the current foreground process and should not
