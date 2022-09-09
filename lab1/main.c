@@ -27,9 +27,8 @@ int main(){
 
    char *command;  
 
-   pid_t pgid = -1;
-   pid_t newPgid = 0;
- 
+   pid_t pid = 0;
+   
    int status = 0;
    int pipefd[2] = {0};
 	
@@ -43,17 +42,24 @@ int main(){
 
    // 0. Register Signal Handlers
    registerSignals();
-  
+/*push(0,0,"hello");
+printStack();
+pop();
+printf("popped\n");
+printStack();
+printf("size of stack is %d\n",getStackSize());
+*/ 
    while(1){
 
       // 1. Print prompt
       command = readline("# "); 
-    
+  
+
       //Ctrl-d (EOF) will exit the shell 
       if(command == NULL){
-         free(stackPtr);
+	 free(stackPtr);
          printf("\n");
-         break;
+	 break;
       }
 
       // 2. Grab and parse input - remove newLine modifier (\n)  
@@ -68,23 +74,22 @@ int main(){
          //4. Determine number of children processes to create (# times to call fork()) 
 
 	 //   Child block act as process control parent 
-         pgid = fork();
-	 newPgid++;
-	 push(pgid,status,command);
+         pid = fork();
+	 push(pid,status,command);
 
-	 if(pgid == 0){
-       	    pgid = newPgid;
-	    tcsetpgrp(STDIN_FILENO,pgid);
+	 if(pid == 0){
             // 5. execute commands using execvp or execlp   
-	    executeCommand(tokens,tokenNum,status,pgid);
-	    tcsetpgrp(STDIN_FILENO,yashPid);
-//printf("Child pgrp is %d\n",pgid);
+   	    setpgid(getpid(),getpid()); //turn self into new process group
+//printf("pgid is %d\n",getpgid(0));
+	    executeCommand(tokens,tokenNum,status,getpid());
 	    exit(0);	    
 	 } else {
-//printf("Parent pgrp is %d\n",yashPid);	
-	    waitpid(pgid,&status,WUNTRACED); 
-	    pop();
- 
+//printf("parent pgid is %d\n",getpgid(0));	
+            //TODO ADD WAY TO CONTINUE IF CHLD DIED AND DONT POP IF CHLD DIED 
+   	    waitpid(pid,&status,WUNTRACED); 
+printStack();
+	    //	    pop();
+//	    tcsetpgrp(STDIN_FILENO,yashPid);
 	 }
 
       } else {

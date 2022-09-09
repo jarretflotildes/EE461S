@@ -27,6 +27,7 @@ jobStack *MyStack;
 jobStack *makeStack(){
    MyStack = (jobStack *)malloc(sizeof(jobStack));
    MyStack->next = NULL;
+   MyStack = NULL;
    return MyStack;
 }
 
@@ -90,7 +91,7 @@ int getHighestJobNum(){
 
 void printStack(){
 
-   if(MyStack->next == NULL){
+   if(MyStack == NULL){
       return;
    }
 
@@ -109,6 +110,9 @@ void printStack(){
 //commands are jobs,&,fg,bg
 int jobsCommandCheck(char *command,char **tokens){
    int jobFlag = 0;
+
+   //TODO add check in case of empty array maybe idk
+   
    if(strcmp(command,"jobs") == 0 ||
       strcmp(command,"fg") == 0  || 
       strcmp(tokens[sizeOfArray(tokens)-1],"&") == 0 || 

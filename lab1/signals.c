@@ -32,9 +32,9 @@ void registerSignals(){
       printf("signal (SIGCHLD) error");
    }   
 
-//   if(signal(SIGKILL,sig_kill) == SIG_ERR){
+   if(signal(SIGKILL,sig_kill) == SIG_ERR){
   //    printf("signal(SIGKILL) error");
-  // }
+   }
 
 }
 
@@ -52,11 +52,19 @@ void setSignalJobStack(jobStack *myStack){
 //and should not print the process (unlike bash)
 static void sig_int(int signo) {
 //printStack();
-    if(getStackSize() == 0 && tcgetpgrp(STDIN_FILENO) == YashPid){
-        printf("\n# ");
+    if(getpgid(STDIN_FILENO) == YashPid && getStackSize() == 0){
+ 	printf("\n# ");
+    }
+    if(getpgid(STDIN_FILENO) == YashPid){
+	jobStack node = pop();
+printStack();
+printf("about to kill %d\n",node.pgid);
+	kill(-1*node.pgid,signo);
     } else {
 //       pop();
-       tcsetpgrp(STDIN_FILENO,YashPid);
+//       printf("pid is %d\n",getpid());
+       
+       kill(-1*getpid(),signo);
     }
 }
 //- Ctrl-z must send SIGTSTP to the current foreground process and should not
@@ -64,22 +72,20 @@ static void sig_int(int signo) {
 //- The shell will not be stopped on SIGTSTP
 static void sig_stp(int signo){
   if(tcgetpgrp(STDIN_FILENO) == YashPid){
-     //set current pgrp to yash
-     tcsetpgrp(STDIN_FILENO,YashPid);
+     printf("\n# "); //don't do anything 
   } else {
      //stop current foreground process and add to job stack
      printf("ehl");
-     pause();
  }
 
 }
 
 static void sig_chld(int signo){
-
+//printf("child gone\n");
 }
 
 static void sig_kill(int signo){
-
+printf("kill\n");
 
 }
 
