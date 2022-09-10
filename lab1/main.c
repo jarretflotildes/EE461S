@@ -48,7 +48,8 @@ pop();
 printf("popped\n");
 printStack();
 printf("size of stack is %d\n",getStackSize());
-*/
+pop();
+pop();*/
    while(1){
 
       // 1. Print prompt
@@ -81,16 +82,17 @@ printf("size of stack is %d\n",getStackSize());
   	 //Maybe FIX THIS, PGID SETPGID MESSES UP "MORE" COMMAND FOR SOME REASON;only command that seems to fail
 //	    int setStatus = tcsetpgrp(1,childPid);
             pid_t childPid = getpid();
-      	    //setpgid(0,0);
+      	    setpgid(0,0);
+//printf("pgid for child is %d\n",getpgid(getpid()));
 	    executeCommand(tokens,tokenNum,status,childPid);
             exit(0);	    
 	 } else {
      	    //TODO ADD WAY TO CONTINUE IF CHLD DIED AND DONT POP IF CHLD DIED 
-    	    push(pid,status,command);
-//	    setpgid(pid,0); //turn child into new process group
+	    setpgid(pid,0); //turn child into new process group
+//printf("pgid for parent is %d\n",getpgid(getpid()));
 	    waitpid(pid,&status,WUNTRACED); 
 //	    int setStatus = tcsetpgrp(1,yashPid);
-	    pop();
+
 	 }
 
       } else{

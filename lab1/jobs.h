@@ -12,7 +12,7 @@ typedef struct jobStack {
 jobStack *makeStack();
 void freeStack();
 void push(pid_t pgid,int status,char *command);
-jobStack pop();
+jobStack *pop();
 int getStackSize();
 int getHighestJobNum();
 void printStack();

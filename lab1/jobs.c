@@ -57,17 +57,28 @@ void push(pid_t pgid,int status,char *command){
    
 }
 
+
+//return node at top
+jobStack peekTop(){
+
+
+}
+
 //Return a jobStack node
-jobStack pop(){
+jobStack *pop(){
 
    jobStack *poppedNodePtr = MyStack;
-   jobStack poppedNode = *poppedNodePtr;   
- 
-   MyStack = MyStack->next;
-   
-   free(poppedNodePtr);
+   jobStack poppedNode;
 
-   return poppedNode;
+   if(MyStack != NULL){
+      MyStack = MyStack->next;
+   }
+
+   if(poppedNodePtr != NULL){      
+      jobStack poppedNode = *poppedNodePtr;
+      free(poppedNodePtr);
+   }
+   return poppedNodePtr;
 
 } 
 int getStackSize(){
@@ -104,10 +115,10 @@ void printStack(){
       return;
    }
 
-   jobStack ptr = pop();
+   jobStack *ptr = pop();
    printStack();
-   printf("[%d]                     %s\n",ptr.jobNum,ptr.command);
-   push(ptr.pgid,ptr.status,ptr.command);
+   printf("[%d]                     %s\n",ptr->jobNum,ptr->command);
+   push(ptr->pgid,ptr->status,ptr->command);
 }
 
 void printFinishedJobs(){
@@ -115,14 +126,15 @@ void printFinishedJobs(){
       return;
    }
 
-   jobStack ptr = pop();
+   jobStack *ptr = pop();
    printFinishedJobs();
+
    //if done print job
-   if(ptr.status == -1){
-      printf("[%d]                     %s\n",ptr.jobNum,ptr.command);
-      MyStack = ptr.next;
+   if(ptr->status == -1){
+      printf("[%d]                     %s\n",ptr->jobNum,ptr->command);
+      MyStack = ptr->next;
    }else{
-      push(ptr.pgid,ptr.status,ptr.command);
+      push(ptr->pgid,ptr->status,ptr->command);
    }
 
 }
