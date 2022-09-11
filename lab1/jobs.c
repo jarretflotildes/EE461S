@@ -98,7 +98,7 @@ void printStack(){
    char *runState[2] = {"-","+"};
 
    for(int i = 0;i<JobIndex;i++){
-      printf("[%d] %s             is %s\n",JobList[i]->jobNum,runState[JobList[i]->runState],JobList[i]->command);
+      printf("[%d] %s               %s\n",JobList[i]->jobNum,runState[JobList[i]->runState],JobList[i]->command);
       printf("pid is %d\n",JobList[i]->pgid);
    }
 }

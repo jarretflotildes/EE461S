@@ -43,6 +43,8 @@ int main(){
    
     // 0. Register Signal Handlers 
     registerSignals();
+    signal(SIGTTOU,SIG_IGN);
+//    signal(SIGTTIN,SIG_IGN);
 
     while(1){ 
       // 1. Print prompt   
@@ -57,6 +59,7 @@ int main(){
 
 pid = fork(); //Child block act as process control parent 	
 if(pid == 0){
+
             pid_t childPid = getpid();
       	    setpgid(0,childPid);
 	    tcsetpgrp(0,childPid); //child into foreground
@@ -64,25 +67,35 @@ char *COMMANDTOKENS[64] = {NULL};
 COMMANDTOKENS[0] = "sleep";
 COMMANDTOKENS[1] = "2";
 execvp(COMMANDTOKENS[0],COMMANDTOKENS);	
-             exit(0);	    
+
+exit(0);	    
 	 } else {
 	    setpgid(pid,0); //turn child into new process group
 	    tcsetpgrp(0,pid); //child into foreground
             push(pid,1,command);
-waitpid(pid,&status,WUNTRACED);
-	    if(!WIFSIGNALED(status)){
-	     pop();
-	    } else{
-printf("signal ended with status %d\n",status);
-              if(status == SIGINT){
-                 pop();
-	      }
-	    }	
-tcsetpgrp(0,yashPid);
-	 }
-    printStack();
+printf("child pid is %d\n",pid);
+printf("parent pid is %d\n",yashPid);
+	    waitpid(pid,&status,WUNTRACED);
+	    tcsetpgrp(0,yashPid); //yash into foreground
+   if(WIFEXITED(status)){
+printf("status is %d\n",status);
+     	pop();
+    } else if(WIFSIGNALED(status)){ 	
+printf("status is %d\n",status);
+      	    pop();
+    } else if(WIFSTOPPED(status)){  	
+printf("status is %d\n",status);
     }
-    /*
+ 
+
+	 }	
+ printStack(); 
+    free(command);
+ 
+
+    }
+
+       /*
       // 2. Grab and parse input - remove newLine modifier (\n)  
       //    each token will be no more than 30 characters 
       char **tokens = parseCommand(command);
@@ -108,16 +121,16 @@ tcsetpgrp(0,yashPid);
 	    setpgid(pid,0); //turn child into new process group
 	    tcsetpgrp(0,pid); //child into foreground
             push(pid,1,command);
-	    waitpid(pid,&status,WUNTRACED);
-	    if(!WIFSIGNALED(status)){
-	     pop();
-	    } else {  
-	      printf("signal ended with status %d\n",status);
-              if(status == SIGINT){
-                 pop();
-	      }
-	    }
+	    waitpid(pid,&status,WUNTRACED); 
 	    tcsetpgrp(0,yashPid);
+
+	    if(WIFEXITED(status)){
+     	       pop();	 
+            } else if(WIFSIGNALED(status)){ 	
+      	       pop();
+            } else if(WIFSTOPPED(status)){  	
+               //keep stopped process in stack
+            }
 	 }
 
       } else{

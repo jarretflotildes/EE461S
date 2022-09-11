@@ -32,9 +32,6 @@ void registerSignals(){
    if(signal(SIGCHLD,sig_chld) == SIG_ERR){
       printf("signal (SIGCHLD) error");
    }   
-
-   signal(SIGTTOU,SIG_IGN);
-
 }
 
 void registerJobStack(job **stackPtr){
@@ -46,7 +43,6 @@ void saveYash(pid_t yash){
 
 
 //signal handlers
-
 //Ctrl-c must quit current foreground process (if one exists) and not the shell
 //and should not print the process (unlike bash)
 static void sig_int(int signo) {
@@ -69,24 +65,18 @@ static void sig_int(int signo) {
 //print the process (unlike bash)
 //The shell will not be stopped on SIGTSTP
 static void sig_stp(int signo){
+
    if(tcgetpgrp(STDIN_FILENO) == YashPid){
        char *newLine = "\n# ";
        int size = 4;
        write(0,newLine,size);
-   } else {  
-       job node = pop();
-       if(node.jobNum > 0){
-          kill(-1*node.pgid,SIGTSTP);
-          push(node.pgid,node.runState,node.command);       
-       }
    }
 
 }
 
 static void sig_chld(int signo){
-   wait(NULL);
+   int status = 0;
+   waitpid(-1,&status,WUNTRACED | WNOHANG);
+
+ 	
 }
-
-
-
-
