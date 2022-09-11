@@ -71,34 +71,28 @@ pop();*/
       //3. Check for job control Token
       
       if(command != "\n" && !jobsCommandCheck(command,tokens)){
-     
          //4. Determine number of children processes to create (# times to call fork()) 
 
-	 //   Child block act as process control parent 
-         pid = fork();
+         pid = fork(); //Child block act as process control parent 
 	
 	 if(pid == 0){
-            // 5. execute commands using execvp or execlp   
-  	 //Maybe FIX THIS, PGID SETPGID MESSES UP "MORE" COMMAND FOR SOME REASON;only command that seems to fail
-//	    int setStatus = tcsetpgrp(1,childPid);
             pid_t childPid = getpid();
       	    setpgid(0,0);
-//printf("pgid for child is %d\n",getpgid(getpid()));
+
+            // 5. execute commands using execvp or execlp   
 	    executeCommand(tokens,tokenNum,status,childPid);
             exit(0);	    
-	 } else {
-     	    //TODO ADD WAY TO CONTINUE IF CHLD DIED AND DONT POP IF CHLD DIED 
-	    setpgid(pid,0); //turn child into new process group
-//printf("pgid for parent is %d\n",getpgid(getpid()));
-	    waitpid(pid,&status,WUNTRACED); 
-//	    int setStatus = tcsetpgrp(1,yashPid);
 
+	 } else {
+	    setpgid(pid,0); //turn child into new process group
+	    tcsetpgrp(0,pid); //child into foreground
+	    waitpid(pid,&status,WUNTRACED); 
+	    tcsetpgrp(0,yashPid);
 	 }
 
       } else{
          // 6. Other commands for job stuff
          executeJobs(command,tokens,stackPtr); 
-
       }
 
       freeParseCommand(tokens,tokenNum);

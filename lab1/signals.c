@@ -31,6 +31,8 @@ void registerSignals(){
    if(signal(SIGCHLD,sig_chld) == SIG_ERR){
       printf("signal (SIGCHLD) error");
    }   
+
+   signal(SIGTTOU,SIG_IGN);
  /*
    if(signal(SIGTTOU,sig_ttou) == SIG_ERR){
       printf("signal (SIGTTOU) error");
@@ -49,31 +51,39 @@ void setSignalJobStack(jobStack *myStack){
 
 //signal handlers
 
-//-  Ctrl-c must quit current foreground process (if one exists) and not the shell
+//Ctrl-c must quit current foreground process (if one exists) and not the shell
 //and should not print the process (unlike bash)
 static void sig_int(int signo) {
-
-    char *newLine = "\n# ";
-    int size = 4;
-
-    write(0,newLine,size);
+ 
+    if(tcgetpgrp(STDIN_FILENO) == YashPid){
+       char *newLine = "\n# ";
+       int size = 4;
+       write(0,newLine,size);
+    } else {
+       tcsetpgrp(STDIN_FILENO,YashPid);     
+       kill(-1*tcgetpgrp(STDIN_FILENO),signo); 
+    }
 
 }
 
-//- Ctrl-z must send SIGTSTP to the current foreground process and should not
+//Ctrl-z must send SIGTSTP to the current foreground process and should not
 //print the process (unlike bash)
-//- The shell will not be stopped on SIGTSTP
+//The shell will not be stopped on SIGTSTP
 static void sig_stp(int signo){
-   if(getpgid(STDIN_FILENO) == YashPid){
- 	printf("\n# ");
-    } else if(getpgid(STDIN_FILENO) != YashPid){
- //       pause();
-    }
+   if(tcgetpgrp(STDIN_FILENO) == YashPid){
+       char *newLine = "\n# ";
+       int size = 4;
+       write(0,newLine,size);
+   } else {  
+         
+   }
+
 }
 
 static void sig_chld(int signo){
-//printf("child gone\n");
+//
 }
+
 
 
 
