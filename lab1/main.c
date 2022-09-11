@@ -56,7 +56,7 @@ int main(){
          printf("\n");
 	 break;
       } 
-
+/*
 pid = fork(); //Child block act as process control parent 	
 if(pid == 0){
 
@@ -93,9 +93,9 @@ printf("status is %d\n",status);
     free(command);
  
 
-    }
+    }*/
 
-       /*
+       
       // 2. Grab and parse input - remove newLine modifier (\n)  
       //    each token will be no more than 30 characters 
       char **tokens = parseCommand(command);
@@ -112,7 +112,10 @@ printf("status is %d\n",status);
             pid_t childPid = getpid();
       	    setpgid(0,0);
 	    tcsetpgrp(0,childPid);
-            
+    
+            signal(SIGINT,SIG_DFL);  //set disposition back to default
+            signal(SIGTSTP,SIG_DFL);
+
 	    // 5. execute commands using execvp or execlp   
 	    executeCommand(tokens,tokenNum,status,childPid);
             exit(0);	    
@@ -124,11 +127,13 @@ printf("status is %d\n",status);
 	    waitpid(pid,&status,WUNTRACED); 
 	    tcsetpgrp(0,yashPid);
 
-	    if(WIFEXITED(status)){
-     	       pop();	 
-            } else if(WIFSIGNALED(status)){ 	
-      	       pop();
+	    if(WIFEXITED(status) || WIFSIGNALED(status)){
+	      // printf("exited:%d\n",status);
+	      // printf("signaled:%d\n",status);
+               free(command);	       
+	       pop();	 
             } else if(WIFSTOPPED(status)){  	
+              // printf("stopped:%d\n",status);
                //keep stopped process in stack
             }
 	 }
@@ -136,14 +141,14 @@ printf("status is %d\n",status);
       } else{
          // 6. Other commands for job stuff
          executeJobs(command,tokens); 
+         free(command);	       
       }
 
       freeParseCommand(tokens,tokenNum);
-      free(command);
 
 printStack();
 //printf("yashPid:%d\n",yashPid);
-   }*/
+   }
 
 }
 

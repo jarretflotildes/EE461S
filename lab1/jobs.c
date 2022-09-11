@@ -38,6 +38,7 @@ void push(pid_t pgid,int runState,char *command){
    job *node = (job *)malloc(sizeof(job));
    node->pgid = pgid;
    node->runState = runState;
+
    node->command = command;
 
    if(JobIndex == 0){
@@ -148,6 +149,7 @@ void executeJobs(char *command,char **tokens){
    if(sizeOfArray(tokens) > 0){
       if(strcmp(tokens[sizeOfArray(tokens)-1],"&") == 0){
          printf("this contains &\n");
+
       }
    }
 
