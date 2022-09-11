@@ -1,24 +1,21 @@
 //jobs
 
-typedef struct jobStack { 
+typedef struct job { 
     pid_t pgid; 
-    int status;
+    int runState;
     int jobNum;
     char *command;
-    struct jobStack *next;
+} job;
 
-} jobStack;
-
-jobStack *makeStack();
+job **makeStack();
+void push(pid_t pgid,int runState,char *command);
 void freeStack();
-void push(pid_t pgid,int status,char *command);
-jobStack *pop();
-int getStackSize();
 int getHighestJobNum();
 void printStack();
-void printFinishedJobs();
+void printNode(job node);
+job pop();
 
 int jobsCommandCheck(char *command,char **tokens);
-void executeJobs(char *command,char **tokens,jobStack *stack);
+void executeJobs(char *command,char **tokens);
 
 

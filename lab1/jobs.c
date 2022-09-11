@@ -10,100 +10,84 @@
 #include "jobs.h"
 #include "parse.h"
 
-#define MAXSIZE 20
+#define STACKSIZE 30
 /*
-typedef struct jobStack { 
+typedef struct job { 
     pid_t pgid; 
-    int status;
+    int runState;
     int jobNum;
     string *command;
-    struct jobStack *next;
 
-} jobStack;
+} job;
 */
-jobStack *MyStack;
+job *JobList[30];
 
-//Initializes MyStack pointer to empty stack
-//Only call once
-jobStack *makeStack(){
-   MyStack = NULL;
-   return MyStack;
+int JobIndex;
+int Top; //jobIndex - 1 
+
+job **makeStack(){
+   JobIndex = 0;
+   Top = 0;
+   for(int i = 0;i<STACKSIZE;i++){
+      JobList[i] = NULL;
+   }
+   return JobList;
+}
+
+void push(pid_t pgid,int runState,char *command){
+   job *node = (job *)malloc(sizeof(job));
+   node->pgid = pgid;
+   node->runState = runState;
+   node->command = command;
+
+   if(JobIndex == 0){
+      node->jobNum = 1;
+   } else {
+      node->jobNum = getHighestJobNum() + 1;
+   }
+   JobList[JobIndex] = node;
+
+   JobIndex++;
+   Top = JobIndex - 1;
+}
+
+job pop(){
+   
+   job value;
+   value.jobNum = -1;
+	   
+   if(JobIndex>0){
+      job *node = JobList[Top];
+
+      free(JobList[Top]);
+      JobIndex--;
+      Top--;
+   }
+
+   return value;
+
+}
+
+void printNode(job node){
+   printf("node[%d] command is %s\n",node.jobNum,node.command);
 }
 
 void freeStack(){
-
-   while(MyStack!=NULL){
-      pop();
+   for(int i = 0;i<JobIndex;i++){
+      free(JobList[i]);
    }
-
-   free(MyStack);
-
-}
-
-void push(pid_t pgid,int status,char *command){
-   jobStack *stack = (jobStack *)malloc(sizeof(jobStack));
-   stack->next = MyStack;
-   stack->pgid = pgid;
-
-   if(getStackSize()==0){ //empty stack first job in stack
-      stack->jobNum = 1;
-   } else { 
-      stack->jobNum = getHighestJobNum();  
-   }
-
-   stack->command = command;
-
-   MyStack = stack;
-   
-}
-
-
-//return node at top
-jobStack peekTop(){
-
-
-}
-
-//Return a jobStack node
-jobStack *pop(){
-
-   jobStack *poppedNodePtr = MyStack;
-   jobStack poppedNode;
-
-   if(MyStack != NULL){
-      MyStack = MyStack->next;
-   }
-
-   if(poppedNodePtr != NULL){      
-      jobStack poppedNode = *poppedNodePtr;
-      free(poppedNodePtr);
-   }
-   return poppedNodePtr;
-
-} 
-int getStackSize(){
-
-   int count = 0;
-   jobStack *ptr = MyStack;
-
-   while(ptr != NULL && ptr->next != NULL){
-      ptr = ptr->next;
-      count++;
-   }
-
-   return count;
-
+   JobIndex = 0;
+   Top = 0;
 }
 
 int getHighestJobNum(){
-   int highest = 1;
-   
-   jobStack *ptr = MyStack;
-   while(ptr->next != NULL){
-      if(ptr->jobNum >= highest){
-         highest = ptr->jobNum + 1;
+
+   int highest = 0;
+
+   for(int i = 0;i<JobIndex;i++){
+      if(JobList[i]->jobNum > highest){
+         highest = JobList[i]->jobNum;
       }
-      ptr = ptr->next;
    }
 
    return highest;
@@ -111,34 +95,13 @@ int getHighestJobNum(){
 
 void printStack(){
 
-   if(MyStack == NULL){
-      return;
-   }
+   char *runState[2] = {"-","+"};
 
-   jobStack *ptr = pop();
-   printStack();
-   printf("[%d]                     %s\n",ptr->jobNum,ptr->command);
-   push(ptr->pgid,ptr->status,ptr->command);
+   for(int i = 0;i<JobIndex;i++){
+      printf("[%d] %s             is %s\n",JobList[i]->jobNum,runState[JobList[i]->runState],JobList[i]->command);
+      printf("pid is %d\n",JobList[i]->pgid);
+   }
 }
-
-void printFinishedJobs(){
-   if(MyStack == NULL){
-      return;
-   }
-
-   jobStack *ptr = pop();
-   printFinishedJobs();
-
-   //if done print job
-   if(ptr->status == -1){
-      printf("[%d]                     %s\n",ptr->jobNum,ptr->command);
-      MyStack = ptr->next;
-   }else{
-      push(ptr->pgid,ptr->status,ptr->command);
-   }
-
-}
-
 
 //commands are jobs,&,fg,bg
 int jobsCommandCheck(char *command,char **tokens){
@@ -162,7 +125,7 @@ int jobsCommandCheck(char *command,char **tokens){
 			   
 }
 
-void executeJobs(char *command,char **tokens,jobStack *stack){
+void executeJobs(char *command,char **tokens){
 
    //user just entered \n character
    if(sizeOfArray(tokens) == 0){

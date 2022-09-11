@@ -2,6 +2,7 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <stdio.h>
+#include <sys/wait.h> 
 
 #include "signals.h"
 
@@ -14,7 +15,7 @@
 */
 
 pid_t YashPid;
-jobStack *myStackPtr;
+job **StackPtr;
 
 void registerSignals(){
 
@@ -33,21 +34,16 @@ void registerSignals(){
    }   
 
    signal(SIGTTOU,SIG_IGN);
- /*
-   if(signal(SIGTTOU,sig_ttou) == SIG_ERR){
-      printf("signal (SIGTTOU) error");
-   }   
-*/
 
 }
 
+void registerJobStack(job **stackPtr){
+   StackPtr = stackPtr;
+}
 void saveYash(pid_t yash){
    YashPid = yash;
 }
 
-void setSignalJobStack(jobStack *myStack){
-   myStackPtr = myStack;
-}
 
 //signal handlers
 
@@ -60,8 +56,11 @@ static void sig_int(int signo) {
        int size = 4;
        write(0,newLine,size);
     } else {
-       tcsetpgrp(STDIN_FILENO,YashPid);     
-       kill(-1*tcgetpgrp(STDIN_FILENO),signo); 
+       job node = pop();
+       if(node.jobNum > 0 ){
+          kill(-1*node.pgid,SIGINT); 
+          push(node.pgid,node.runState,node.command);
+       }
     }
 
 }
@@ -75,13 +74,17 @@ static void sig_stp(int signo){
        int size = 4;
        write(0,newLine,size);
    } else {  
-         
+       job node = pop();
+       if(node.jobNum > 0){
+          kill(-1*node.pgid,SIGTSTP);
+          push(node.pgid,node.runState,node.command);       
+       }
    }
 
 }
 
 static void sig_chld(int signo){
-//
+   wait(NULL);
 }
 
 

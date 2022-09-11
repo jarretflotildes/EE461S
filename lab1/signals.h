@@ -3,7 +3,8 @@
 void registerSignals();
 void saveYash(pid_t yash);
 
-void setSignalJobStack(jobStack *myStack);
+void registerJobStack(job **ptr);
+
 
 static void sig_int(int signo);
 static void sig_stp(int signo);
