@@ -75,6 +75,33 @@ int peek(){
    return Top;
 }
 
+void checkKilledPids(){
+
+   for(int i = 0;i<JobIndex;i++){
+      int killStatus = kill(-1*JobList[i]->pgid,0);
+      if(killStatus == -1){
+         changeRunStatePos(JobList[i]->pgid,2); //2 indicates finished job
+      }
+   }
+
+}
+
+//check if top pid is stopped and add to list if so 
+void addStoppedPid(){
+
+
+}	
+	
+void changeRunStatePos(int pgid,int newRunState){
+
+   for(int i = 0;i<JobIndex;i++){
+      if(JobList[i]->pgid == pgid){
+         JobList[i]->runState = newRunState;
+      }
+   }
+
+}
+
 void changeRunState(int stackNum,int newRunState){
 
    for(int i = 0;i<JobIndex;i++){
@@ -84,15 +111,8 @@ void changeRunState(int stackNum,int newRunState){
    }
 }
 
-//do later 
-void writeNode(job node){
-   //printf("[%d] Done          %s\n",node.jobNum,node.command);
-   //char *string = "[";
-   //write(0,newLine,sie);
-}
-
 void printNode(job node){
-   printf("[%d] Done          %s\n",node.jobNum,node.command);
+   printf("[%d] Done              %s\n",node.jobNum,node.command);
 }
 
 void freeStack(){
@@ -137,10 +157,37 @@ void printFinishedJobs(){
 
    for(int i = 0;i<JobIndex;i++){ 
       if(JobList[i]->runState == 2) { //NOT TOP -
-         printf("[%d]-  %s               %s\n",JobList[i]->jobNum,runState[JobList[i]->runState],JobList[i]->command);
+         printf("[%d]- %s               %s\n",JobList[i]->jobNum,runState[JobList[i]->runState],JobList[i]->command);
       }
    }
 
+   cleanJobs();
+
+}
+
+
+//remove jobs that are finished from array
+void cleanJobs(){
+   job *newJobList[30] = {NULL};
+
+   int newTop = 0;
+   int newJobIndex = 0;
+
+   int j = 0;
+
+   for(int i = 0;i<JobIndex;i++){
+      if(JobList[i]->runState != 2){
+         newJobList[j] = JobList[i];
+         j++;
+	 newJobIndex++;
+	 newTop = newJobIndex - 1;	 
+      }
+   }
+
+//   freeStack();
+   *JobList = *newJobList;
+   Top = newTop;
+   JobIndex = newJobIndex;
 }
 
 
@@ -204,15 +251,15 @@ void executeJobs(char *command,char **tokens,int yashPid){
             signal(SIGTSTP,SIG_DFL);
             
 	    // 5. execute commands using execvp or execlp   
-            char **removeAnd =chopArray(tokens,sizeOfArray(tokens),0,sizeOfArray(tokens)-1);
+            char **removeAnd = chopArray(tokens,sizeOfArray(tokens),0,sizeOfArray(tokens)-1);
 	    executeCommand(removeAnd,sizeOfArray(removeAnd),status,childPid);
-       	    exit(0);	    
+	    exit(0);	    
 
 	 } else {
 	    setpgid(pid,0); //turn child into new process group
             push(pid,1,command); 
             waitpid(-1,&status,WNOHANG); //main parent keeps going 
-         }
+	 }
       }
    } 
 }

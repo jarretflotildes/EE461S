@@ -30,7 +30,11 @@ void executeCommand(char **tokens,int tokenNum,int status,pid_t pid){
    	     //normal exec
              pid = fork();
 	     if(pid == 0){
-                execvp(tokens[0],tokens);// first in array is always command
+      signal(SIGINT,SIG_IGN);  //set disposition back to default
+            signal(SIGTSTP,SIG_IGN);
+
+
+      	        execvp(tokens[0],tokens);// first in array is always command
 	        exit(0);
              } else {
 	        blockingWait(pid);

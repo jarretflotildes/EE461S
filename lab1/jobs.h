@@ -9,14 +9,21 @@ typedef struct job {
 
 job **makeStack();
 void push(pid_t pgid,int runState,char *command);
+job pop();
 int peek();
+void checkKilledPids();
+void changeRunStatePos(int pgid,int newRunState);
 void changeRunState(int stackNum,int newRunState);
 void freeStack();
 int getHighestJobNum();
+void addStoppedPid();
+
+
+void removePosition(int nodeNum);
+void cleanJobs();
 void printStack();
 void printNode(job node);
 void printFinishedJobs();
-job pop();
 
 int jobsCommandCheck(char *command,char **tokens);
 void executeJobs(char *command,char **tokens,int yashPid);
