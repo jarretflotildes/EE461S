@@ -9,12 +9,13 @@
 
 #include "jobs.h"
 #include "parse.h"
+#include "actionModule.h"
 
 #define STACKSIZE 30
 /*
 typedef struct job { 
     pid_t pgid; 
-    int runState;
+    int runState; 0 - STOPPED, 1 - RUNNING, 2 - DONE
     int jobNum;
     string *command;
 
@@ -23,7 +24,7 @@ typedef struct job {
 job *JobList[30];
 
 int JobIndex;
-int Top; //jobIndex - 1 
+int Top; //jobIndex - 1
 
 job **makeStack(){
    JobIndex = 0;
@@ -39,7 +40,8 @@ void push(pid_t pgid,int runState,char *command){
    node->pgid = pgid;
    node->runState = runState;
 
-   node->command = command;
+   node->command = malloc(sizeof(char*) * strlen(command));
+   strcpy(node->command,command);
 
    if(JobIndex == 0){
       node->jobNum = 1;
@@ -59,7 +61,7 @@ job pop(){
 	   
    if(JobIndex>0){
       job *node = JobList[Top];
-
+      value = *node;
       free(JobList[Top]);
       JobIndex--;
       Top--;
@@ -69,8 +71,28 @@ job pop(){
 
 }
 
+int peek(){
+   return Top;
+}
+
+void changeRunState(int stackNum,int newRunState){
+
+   for(int i = 0;i<JobIndex;i++){
+      if(i == stackNum){
+         JobList[i]->runState = newRunState;
+      }
+   }
+}
+
+//do later 
+void writeNode(job node){
+   //printf("[%d] Done          %s\n",node.jobNum,node.command);
+   //char *string = "[";
+   //write(0,newLine,sie);
+}
+
 void printNode(job node){
-   printf("node[%d] command is %s\n",node.jobNum,node.command);
+   printf("[%d] Done          %s\n",node.jobNum,node.command);
 }
 
 void freeStack(){
@@ -94,15 +116,35 @@ int getHighestJobNum(){
    return highest;
 }
 
+//int runState; 0 - STOPPED, 1 - RUNNING, 2 - DONE
 void printStack(){
 
-   char *runState[2] = {"-","+"};
+   char *runState[3] = {"Stopped","Running","Done"};
 
-   for(int i = 0;i<JobIndex;i++){
-      printf("[%d] %s               %s\n",JobList[i]->jobNum,runState[JobList[i]->runState],JobList[i]->command);
-      printf("pid is %d\n",JobList[i]->pgid);
+   for(int i = 0;i<JobIndex;i++){ 
+      if(i == Top){ //TOP + 
+         printf("[%d]+ %s              %s\n",JobList[i]->jobNum,runState[JobList[i]->runState],JobList[i]->command);
+      } else { //NOT TOP -
+         printf("[%d]- %s              %s\n",JobList[i]->jobNum,runState[JobList[i]->runState],JobList[i]->command);
+      }
    }
 }
+
+//int runState; 0 - STOPPED, 1 - RUNNING, 2 - DONE
+void printFinishedJobs(){
+
+   char *runState[3] = {"Stopped","Running","Done"};
+
+   for(int i = 0;i<JobIndex;i++){ 
+      if(JobList[i]->runState == 2) { //NOT TOP -
+         printf("[%d]-  %s               %s\n",JobList[i]->jobNum,runState[JobList[i]->runState],JobList[i]->command);
+      }
+   }
+
+}
+
+
+
 
 //commands are jobs,&,fg,bg
 int jobsCommandCheck(char *command,char **tokens){
@@ -126,15 +168,17 @@ int jobsCommandCheck(char *command,char **tokens){
 			   
 }
 
-void executeJobs(char *command,char **tokens){
+void executeJobs(char *command,char **tokens,int yashPid){
+
 
    //user just entered \n character
    if(sizeOfArray(tokens) == 0){
       return;
    }
 
+   int status = 0;
+
    if(strcmp(command,"jobs") == 0){
-      printf("these are the jobs\n");
       printStack();
    }    
 
@@ -148,9 +192,27 @@ void executeJobs(char *command,char **tokens){
  
    if(sizeOfArray(tokens) > 0){
       if(strcmp(tokens[sizeOfArray(tokens)-1],"&") == 0){
-         printf("this contains &\n");
+         //printf("this contains &\n");
+         pid_t pid = fork(); //Child block act as process control parent 
+	
+	 if(pid == 0){
+            pid_t childPid = getpid();
+      	    setpgid(0,0);
 
+            push(pid,1,command); 
+            signal(SIGINT,SIG_DFL);  //set disposition back to default
+            signal(SIGTSTP,SIG_DFL);
+            
+	    // 5. execute commands using execvp or execlp   
+            char **removeAnd =chopArray(tokens,sizeOfArray(tokens),0,sizeOfArray(tokens)-1);
+	    executeCommand(removeAnd,sizeOfArray(removeAnd),status,childPid);
+       	    exit(0);	    
+
+	 } else {
+	    setpgid(pid,0); //turn child into new process group
+            push(pid,1,command); 
+            waitpid(-1,&status,WNOHANG); //main parent keeps going 
+         }
       }
-   }
-
+   } 
 }
