@@ -70,10 +70,7 @@ int main(){
       	    setpgid(0,0);
 	    tcsetpgrp(0,childPid);
 
-            signal(SIGINT,SIG_DFL);  //set disposition back to default
-            signal(SIGTSTP,SIG_DFL);
-
-	    // 5. execute commands using execvp or execlp   
+      	    // 5. execute commands using execvp or execlp   
 	    executeCommand(tokens,tokenNum,status,childPid);
             exit(0);	    
 

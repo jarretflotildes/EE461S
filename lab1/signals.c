@@ -71,7 +71,7 @@ static void sig_stp(int signo){
        char *newLine = "\n# ";
        int size = 4;
        write(0,newLine,size);
-   }
+   } 
 
 }
 

@@ -13,11 +13,14 @@
 void executeCommand(char **tokens,int tokenNum,int status,pid_t pid){
  
  	 char *redirection = findNextFileRedirection(tokens);
-      
+         
+	 signal(SIGINT,SIG_IGN);  //only parent should respond to signals
+         signal(SIGTSTP,SIG_IGN);
+
          if(strcmp(redirection,"|") == 0){
                int location = getTokenLocation(tokens,"|");        
-               pipeCommand(tokens,tokenNum,status,location);		
-         } else if(strcmp(redirection,"2>") == 0){
+                          pipeCommand(tokens,tokenNum,status,location);		
+	 } else if(strcmp(redirection,"2>") == 0){
                int location = getTokenLocation(tokens,"2>");
                stdErrNextToken(tokens,tokenNum,location);
          } else if(strcmp(redirection,"<") == 0){
@@ -30,11 +33,7 @@ void executeCommand(char **tokens,int tokenNum,int status,pid_t pid){
    	     //normal exec
              pid = fork();
 	     if(pid == 0){
-      signal(SIGINT,SIG_IGN);  //set disposition back to default
-            signal(SIGTSTP,SIG_IGN);
-
-
-      	        execvp(tokens[0],tokens);// first in array is always command
+          	execvp(tokens[0],tokens);// first in array is always command
 	        exit(0);
              } else {
 	        blockingWait(pid);
@@ -43,6 +42,8 @@ void executeCommand(char **tokens,int tokenNum,int status,pid_t pid){
 }
 
 void blockingWait(pid_t pid){
+   signal(SIGINT,SIG_DFL);  //set disposition back to default
+   signal(SIGTSTP,SIG_DFL);
    int status = 0;
    waitpid(pid,&status,0);
    exit(status);
@@ -91,8 +92,8 @@ void pipeCommand(char **tokens,int tokenNum,int status,int location){
 	} 
 
 	else{		
-           waitpid(pid,&status,0); //parent waits for child in charge of piping children	
-        }
+           blockingWait(pid); //parent waits for child in charge of piping children	
+	}
 
 }
 
@@ -147,8 +148,8 @@ void stdInNextToken(char **tokens,int tokenNum,int location){
 	}
 
         else { 
-           waitpid(pid,&status,0);	
- 	}	
+ 	    blockingWait(pid); 
+	}	
 
 }
 	 
@@ -176,8 +177,8 @@ void stdOutNextToken(char **tokens,int tokenNum,int location){
 	}
 
         else { 
-           waitpid(pid,&status,0);	
- 	}	
+ 	   blockingWait(pid); 
+	}	
 
 }
 
@@ -204,7 +205,7 @@ void stdErrNextToken(char **tokens,int tokenNum,int location){
 	}
 
         else { 
-           waitpid(pid,&status,0);	
+           blockingWait(pid); 
  	}	
 
 }	
