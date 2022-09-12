@@ -12,6 +12,7 @@ void push(pid_t pgid,int runState,char *command);
 job pop();
 int peek();
 int getStackSize();
+int getMostRecentStopped();
 
 void checkKilledPids();
 void changeRunStatePos(int pgid,int newRunState);

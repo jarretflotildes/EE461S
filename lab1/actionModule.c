@@ -19,7 +19,7 @@ void executeCommand(char **tokens,int tokenNum,int status,pid_t pid){
 
          if(strcmp(redirection,"|") == 0){
                int location = getTokenLocation(tokens,"|");        
-                          pipeCommand(tokens,tokenNum,status,location);		
+               pipeCommand(tokens,tokenNum,status,location);		
 	 } else if(strcmp(redirection,"2>") == 0){
                int location = getTokenLocation(tokens,"2>");
                stdErrNextToken(tokens,tokenNum,location);

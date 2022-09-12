@@ -12,6 +12,10 @@
 #include "actionModule.h"
 
 #define STACKSIZE 30
+#define STOPPED    0
+#define RUNNING    1
+#define DONE       2
+
 /*
 typedef struct job { 
     pid_t pgid; 
@@ -79,12 +83,22 @@ int getStackSize(){
    return JobIndex;
 }
 
+int getMostRecentStopped(){
+    int mostRecent = -1;
+    for(int i = 0;i<JobIndex;i++){
+       if(JobList[i]->runState == 0){
+           mostRecent = i;
+       }
+    }
+    return mostRecent;
+}
+
 void checkKilledPids(){
 
    for(int i = 0;i<JobIndex;i++){
       int killStatus = kill(-1*JobList[i]->pgid,0);
       if(killStatus == -1){
-         changeRunStatePos(JobList[i]->pgid,2); //2 indicates finished job
+         changeRunStatePos(JobList[i]->pgid,DONE);
       }
    }
 
@@ -185,12 +199,19 @@ void cleanJobs(){
    int j = 0;
 
    for(int i = 0;i<JobIndex;i++){
-      if(JobList[i]->runState != 2){
+      if(JobList[i]->runState != DONE){
          newJobList[j] = JobList[i];
          j++;
 	 newJobIndex++;
 	 newTop = newJobIndex - 1;	 
+      } else {
+          free(JobList[i]->command);
+	  free(JobList[i]);
       }
+   }
+
+   if(getStackSize() == 0){
+      makeStack();
    }
 
    *JobList = *newJobList;
@@ -236,29 +257,30 @@ void executeJobs(char *command,char **tokens,int yashPid){
 
    if(strcmp(command,"fg") == 0){
       if(getStackSize()>0){
-         job node = pop(); //get info and immediately return it to stack as running
-	 push(node.pgid,1,node.command);
+         
+	 job node = *JobList[Top];
+	 JobList[Top]->runState = RUNNING;
 
-        	      
 	 tcsetpgrp(0,node.pgid); //child into foreground
 	 kill(-1*node.pgid,SIGCONT);
 	 waitpid(node.pgid,&status,WUNTRACED); 
 	 tcsetpgrp(0,yashPid);
 
 	 if(WIFEXITED(status) || WIFSIGNALED(status)){
-           changeRunState(peek(),2); //change top of stack to done
-         } else if(WIFSTOPPED(status)){  	
+           job freeNode = pop();
+	   free(freeNode.command);
+       	 } else if(WIFSTOPPED(status)){  	
            changeRunState(peek(),0); //change top of stack to stopped
          }
       }
    }
 
    if(strcmp(command,"bg") == 0){
-      if(getStackSize()>0){
-         job node = pop(); //get info and immediately return it to stack as running
-	 push(node.pgid,1,node.command);
-	 kill(-1*node.pgid,SIGCONT);
-         waitpid(-1,&status,WNOHANG); //main parent keeps going 
+      if(getMostRecentStopped() >= 0){
+	 int mostRecent = getMostRecentStopped();
+         JobList[mostRecent]->runState = RUNNING;	
+	 kill(-1*JobList[mostRecent]->pgid,SIGCONT);
+	 waitpid(-1,&status,WNOHANG); //main parent keeps going 
       }
    }
  
@@ -278,12 +300,13 @@ void executeJobs(char *command,char **tokens,int yashPid){
 	    // 5. execute commands using execvp or execlp   
             char **removeAnd = chopArray(tokens,sizeOfArray(tokens),0,sizeOfArray(tokens)-1);
 	    executeCommand(removeAnd,sizeOfArray(removeAnd),status,childPid);
+
 	    exit(0);	    
 
 	 } else {
 	    setpgid(pid,0); //turn child into new process group
             push(pid,1,command); 
-            waitpid(-1,&status,WNOHANG); //main parent keeps going 
+            waitpid(-1,&status,WNOHANG); //main parent keeps going
 	 }
       }
    } 
