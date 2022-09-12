@@ -12,6 +12,7 @@
 #include "actionModule.h"
 
 #define STACKSIZE 30
+
 #define STOPPED    0
 #define RUNNING    1
 #define DONE       2

@@ -73,7 +73,6 @@ static void sig_stp(int signo){
        write(0,newLine,size);
    } 
 
-
 }
 
 static void sig_chld(int signo){

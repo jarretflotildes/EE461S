@@ -167,7 +167,6 @@ void stdOutNextToken(char **tokens,int tokenNum,int location){
 
 	   fd = open(tokens[location+1],O_RDWR | O_TRUNC | O_CREAT,mode); //file is right after >         
            
-	  
 	   dup2(fd,1);
  	    
 	   redirectionChecks(mergedArray);

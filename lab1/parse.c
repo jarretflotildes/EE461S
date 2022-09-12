@@ -16,7 +16,6 @@ char **parseCommand(char *command){
       
       commandCopy = toFree = strdup(command);
 
-
       tokens = malloc((getNumberOfTokens(command)+1) * sizeof(char*));   //+1 for null
 
       int i = 0;
@@ -42,7 +41,6 @@ void freeParseCommand(char **tokens,int tokenNum){
       }
 
       free(tokens);
-
 
 }
 
