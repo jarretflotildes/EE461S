@@ -1,1 +1,21 @@
-0 0 0 a.txt
+a.txt
+actionModule.c
+actionModule.h
+actionModule.o
+b.txt
+error.txt
+in1.txt
+jobs.c
+jobs.h
+jobs.o
+main.c
+main.o
+makefile
+parse.c
+parse.h
+parse.o
+pipe.c
+signals.c
+signals.h
+signals.o
+yash

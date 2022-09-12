@@ -75,6 +75,10 @@ int peek(){
    return Top;
 }
 
+int getStackSize(){
+   return JobIndex;
+}
+
 void checkKilledPids(){
 
    for(int i = 0;i<JobIndex;i++){
@@ -86,12 +90,6 @@ void checkKilledPids(){
 
 }
 
-//check if top pid is stopped and add to list if so 
-void addStoppedPid(){
-
-
-}	
-	
 void changeRunStatePos(int pgid,int newRunState){
 
    for(int i = 0;i<JobIndex;i++){
@@ -111,8 +109,15 @@ void changeRunState(int stackNum,int newRunState){
    }
 }
 
+
+
 void printNode(job node){
-   printf("[%d] Done              %s\n",node.jobNum,node.command);
+   if(JobList[Top]->pgid == node.pgid){
+      printf("[%d]+ Done              %s\n",node.jobNum,node.command);
+   } else {
+      printf("[%d]- Done              %s\n",node.jobNum,node.command);
+   }
+
 }
 
 void freeStack(){
@@ -157,7 +162,11 @@ void printFinishedJobs(){
 
    for(int i = 0;i<JobIndex;i++){ 
       if(JobList[i]->runState == 2) { //NOT TOP -
-         printf("[%d]- %s               %s\n",JobList[i]->jobNum,runState[JobList[i]->runState],JobList[i]->command);
+         if(i == Top){ //TOP + 
+         printf("[%d]+ %s                 %s\n",JobList[i]->jobNum,runState[JobList[i]->runState],JobList[i]->command);
+            } else { //NOT TOP -
+            printf("[%d]- %s                 %s\n",JobList[i]->jobNum,runState[JobList[i]->runState],JobList[i]->command);
+         }
       }
    }
 
@@ -184,14 +193,10 @@ void cleanJobs(){
       }
    }
 
-//   freeStack();
    *JobList = *newJobList;
    Top = newTop;
    JobIndex = newJobIndex;
 }
-
-
-
 
 //commands are jobs,&,fg,bg
 int jobsCommandCheck(char *command,char **tokens){
@@ -210,7 +215,7 @@ int jobsCommandCheck(char *command,char **tokens){
 
       jobFlag = 1;
    }
-//printf("jobsFlag is %d\n",jobFlag);
+   
    return jobFlag;
 			   
 }
@@ -230,21 +235,41 @@ void executeJobs(char *command,char **tokens,int yashPid){
    }    
 
    if(strcmp(command,"fg") == 0){
-      printf("this is fg\n");
+      if(getStackSize()>0){
+         job node = pop(); //get info and immediately return it to stack as running
+	 push(node.pgid,1,node.command);
+
+        	      
+	 tcsetpgrp(0,node.pgid); //child into foreground
+	 kill(-1*node.pgid,SIGCONT);
+	 waitpid(node.pgid,&status,WUNTRACED); 
+	 tcsetpgrp(0,yashPid);
+
+	 if(WIFEXITED(status) || WIFSIGNALED(status)){
+           changeRunState(peek(),2); //change top of stack to done
+         } else if(WIFSTOPPED(status)){  	
+           changeRunState(peek(),0); //change top of stack to stopped
+         }
+      }
    }
 
    if(strcmp(command,"bg") == 0){
-      printf("this is bg\n");
+      if(getStackSize()>0){
+         job node = pop(); //get info and immediately return it to stack as running
+	 push(node.pgid,1,node.command);
+	 kill(-1*node.pgid,SIGCONT);
+         waitpid(-1,&status,WNOHANG); //main parent keeps going 
+      }
    }
  
-   if(sizeOfArray(tokens) > 0){
+   if(sizeOfArray(tokens) > 1){ //ignore if only character is just &
       if(strcmp(tokens[sizeOfArray(tokens)-1],"&") == 0){
          //printf("this contains &\n");
          pid_t pid = fork(); //Child block act as process control parent 
 	
 	 if(pid == 0){
             pid_t childPid = getpid();
-      	    setpgid(0,0);
+      	    setpgid(0,0);    //turn child into new process group
 
             push(pid,1,command); 
             signal(SIGINT,SIG_DFL);  //set disposition back to default

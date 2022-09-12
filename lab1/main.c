@@ -21,6 +21,11 @@
 #include "signals.h"
 //jobs.h in signals.h
 
+#define STOPPED 0
+#define RUNNING 1
+#define DONE    2  
+
+
 int main(){
 	
     //printf("Hello World\n");
@@ -77,7 +82,7 @@ int main(){
 	 } else {
 	    setpgid(pid,0); //turn child into new process group
 	    tcsetpgrp(0,pid); //child into foreground
-            push(pid,1,command);
+            push(pid,RUNNING,command);
 	    waitpid(pid,&status,WUNTRACED); 
 	    tcsetpgrp(0,yashPid);
 
@@ -86,8 +91,7 @@ int main(){
 	      // printf("exited:%d\n",status);
 	      // printf("signaled:%d\n",status);
             } else if(WIFSTOPPED(status)){  	
-              // printf("stopped:%d\n",status);
-               //keep stopped process in stack
+               changeRunState(peek(),STOPPED); //change top of stack to stopped
             }
 	 }
 
@@ -96,7 +100,6 @@ int main(){
          executeJobs(command,tokens,yashPid); 
       }
 
-//printStack();
       freeParseCommand(tokens,tokenNum);
       free(command);	       
 //printf("yashPid:%d\n",yashPid);

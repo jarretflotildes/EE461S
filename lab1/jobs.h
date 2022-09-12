@@ -11,13 +11,13 @@ job **makeStack();
 void push(pid_t pgid,int runState,char *command);
 job pop();
 int peek();
+int getStackSize();
+
 void checkKilledPids();
 void changeRunStatePos(int pgid,int newRunState);
 void changeRunState(int stackNum,int newRunState);
 void freeStack();
 int getHighestJobNum();
-void addStoppedPid();
-
 
 void removePosition(int nodeNum);
 void cleanJobs();
