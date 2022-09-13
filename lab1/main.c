@@ -44,7 +44,6 @@ int main(){
     while(1){ 
       // 1. Print prompt   
       command = readline("# "); 
-
       //Ctrl-d (EOF) will exit the shell 
       if(command == NULL){
 	 freeStack();
@@ -52,7 +51,7 @@ int main(){
 	 break;
       }
 
-      checkKilledPids(); 
+      checkKilledPids();
       printFinishedJobs();
 
       // 2. Grab and parse input - remove newLine modifier (\n)  

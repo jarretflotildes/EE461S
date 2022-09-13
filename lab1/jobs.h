@@ -23,6 +23,7 @@ int getHighestJobNum();
 void removePosition(int nodeNum);
 void cleanJobs();
 void printStack();
+void debugPrintStack();
 void printNode(job node);
 void printFinishedJobs();
 

@@ -24,7 +24,7 @@ void registerSignals(){
    if(signal(SIGINT,sig_int) == SIG_ERR){
       printf("signal(SIGINT) error");
    }	 
-   
+  
    //^Z
    if(signal(SIGTSTP,sig_stp) == SIG_ERR){
       printf("signal(SIGSTP) error");

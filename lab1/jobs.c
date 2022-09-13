@@ -16,6 +16,7 @@
 #define STOPPED    0
 #define RUNNING    1
 #define DONE       2
+#define CLEAN      3
 
 /*
 typedef struct job { 
@@ -26,7 +27,7 @@ typedef struct job {
 
 } job;
 */
-job *JobList[30];
+job *JobList[50];
 
 int JobIndex;
 int Top; //jobIndex - 1
@@ -71,7 +72,12 @@ job pop(){
       JobIndex--;
       Top--;
    }
-
+/*
+   if(value.runState == CLEAN){
+      value = pop();
+      printNode(value);
+   }
+*/
    return value;
 
 }
@@ -98,7 +104,7 @@ void checkKilledPids(){
 
    for(int i = 0;i<JobIndex;i++){
       int killStatus = kill(-1*JobList[i]->pgid,0);
-      if(killStatus == -1){
+      if(killStatus == -1 && JobList[i]->runState == RUNNING){
          JobList[i]->runState = DONE;
       }
    }
@@ -110,12 +116,14 @@ void changeRunState(int num,int newRunState){
 }
 
 void printNode(job node){
-   if(JobList[Top]->pgid == node.pgid){
-      printf("[%d]+ Done              %s\n",node.jobNum,node.command);
-   } else {
-      printf("[%d]- Done              %s\n",node.jobNum,node.command);
-   }
+   char *runState[3] = {"Stopped","Running","Done"};
 
+   if(JobList[Top]->pgid == node.pgid){
+      printf("[%d]+ %s              %s\n",node.jobNum,runState[node.runState],node.command);
+   } else {
+      printf("[%d]- %s              %s\n",node.jobNum,runState[node.runState],node.command); 
+   }
+ 
 }
 
 void freeStack(){
@@ -131,7 +139,7 @@ int getHighestJobNum(){
    int highest = 0;
 
    for(int i = 0;i<JobIndex;i++){
-      if(JobList[i]->jobNum > highest){
+      if(JobList[i]->jobNum > highest && JobList[i]->runState != CLEAN){
          highest = JobList[i]->jobNum;
       }
    }
@@ -147,63 +155,66 @@ void printStack(){
    for(int i = 0;i<JobIndex;i++){ 
       if(i == Top){ //TOP + 
          printf("[%d]+ %s              %s\n",JobList[i]->jobNum,runState[JobList[i]->runState],JobList[i]->command);
+      } else if(JobList[i]->runState != CLEAN) { //NOT TOP -
+         printf("[%d]- %s              %s\n",JobList[i]->jobNum,runState[JobList[i]->runState],JobList[i]->command);
+      }
+   }
+}
+//int runState; 0 - STOPPED, 1 - RUNNING, 2 - DONE
+void debugPrintStack(){
+
+   char *runState[4] = {"Stopped","Running","Done","Clean"};
+
+   for(int i = 0;i<JobIndex;i++){ 
+      if(i == Top){ //TOP + 
+         printf("[%d]+ %s              %s\n",JobList[i]->jobNum,runState[JobList[i]->runState],JobList[i]->command);
       } else { //NOT TOP -
          printf("[%d]- %s              %s\n",JobList[i]->jobNum,runState[JobList[i]->runState],JobList[i]->command);
       }
    }
 }
 
+
+
+
 //int runState; 0 - STOPPED, 1 - RUNNING, 2 - DONE
 void printFinishedJobs(){
 
-   char *runState[3] = {"Stopped","Running","Done"};
+   char *runstate[3] = {"Stopped","Running","Done"};
+
 
    for(int i = 0;i<JobIndex;i++){ 
-      if(JobList[i]->runState == 2) { //NOT TOP -
-         if(i == Top){ //TOP + 
-            printf("[%d]+ %s                 %s\n",JobList[i]->jobNum,runState[JobList[i]->runState],JobList[i]->command);
-            } else { //NOT TOP -
-            printf("[%d]- %s                 %s\n",JobList[i]->jobNum,runState[JobList[i]->runState],JobList[i]->command);
-         }
-      }
-   }
+      if(JobList[i]->runState == DONE) { 
+          if(i == Top){ //TOP + 
+            printf("[%d]+ %s                 %s\n",JobList[i]->jobNum,runstate[JobList[i]->runState],JobList[i]->command);
+         } else { //NOT TOP -
+            printf("[%d]- %s                 %s\n",JobList[i]->jobNum,runstate[JobList[i]->runState],JobList[i]->command);
 
+         }
+ 
+      }   
+   }
    cleanJobs();
 
 }
 
 //remove jobs that are finished from array
 void cleanJobs(){
-   job *newJobList[30] = {NULL};
-
-   int newTop = 0;
-   int newJobIndex = 0;
-
-   int j = 0;
-
+   
    for(int i = 0;i<JobIndex;i++){
-printf("JobList[%d] command is %s at i = %d\n",JobList[i]->jobNum,JobList[i]->command,i);
-
-      if(JobList[i]->runState != DONE){
-//printf("newJobList[%d] command is %s at i = %d\n",JobList[i]->jobNum,JobList[i]->command,i);
-         newJobList[j] = JobList[i];         
-	 j++;
-	 newJobIndex++;
-	 newTop = newJobIndex - 1;	 
-      } else {
-//          free(JobList[i]->command);
-//	  free(JobList[i]);
-//	  JobList[i] = NULL;
+      if(JobList[i]->runState == DONE){
+        JobList[i]->runState = CLEAN; 
       }
    }
 
-   if(getStackSize() == 0){
-      makeStack();
-   }
+   //if top of stack is clean remove it from stack
+   while(JobList[Top] != NULL && JobList[Top]->runState == CLEAN){    
+      if(JobList[Top]->runState == CLEAN){
+         job node = pop();
+	 free(node.command);
+      }
+   } 
 
-   *JobList = *newJobList;
-   Top = newTop;
-   JobIndex = newJobIndex;
 }
 
 //commands are jobs,&,fg,bg
@@ -230,7 +241,6 @@ int jobsCommandCheck(char *command,char **tokens){
 
 void executeJobs(char *command,char **tokens,int yashPid){
 
-
    //user just entered \n character
    if(sizeOfArray(tokens) == 0){
       return;
@@ -252,9 +262,9 @@ void executeJobs(char *command,char **tokens,int yashPid){
 	 kill(-1*node.pgid,SIGCONT);
 	 waitpid(node.pgid,&status,WUNTRACED); 
 	 tcsetpgrp(0,yashPid);
-
+	 
 	 if(WIFEXITED(status) || WIFSIGNALED(status)){
-           job freeNode = pop();
+       	   job freeNode = pop();
 	   free(freeNode.command);
        	 } else if(WIFSTOPPED(status)){  	
 	      JobList[Top]->runState = STOPPED;
