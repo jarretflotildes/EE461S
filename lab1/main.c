@@ -80,7 +80,7 @@ int main(){
 	    waitpid(pid,&status,WUNTRACED); 
 	    tcsetpgrp(0,yashPid);
 
-        if(WIFEXITED(status) || WIFSIGNALED(status)){
+            if(WIFEXITED(status) || WIFSIGNALED(status)){
      	      job node = pop();
 	      free(node.command);
             } else if(WIFSTOPPED(status)){  	

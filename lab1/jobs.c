@@ -182,7 +182,10 @@ void cleanJobs(){
    int j = 0;
 
    for(int i = 0;i<JobIndex;i++){
+printf("JobList[%d] command is %s at i = %d\n",JobList[i]->jobNum,JobList[i]->command,i);
+
       if(JobList[i]->runState != DONE){
+//printf("newJobList[%d] command is %s at i = %d\n",JobList[i]->jobNum,JobList[i]->command,i);
          newJobList[j] = JobList[i];         
 	 j++;
 	 newJobIndex++;
@@ -190,7 +193,7 @@ void cleanJobs(){
       } else {
 //          free(JobList[i]->command);
 //	  free(JobList[i]);
-	  JobList[i] = NULL;
+//	  JobList[i] = NULL;
       }
    }
 
