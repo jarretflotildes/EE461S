@@ -52,6 +52,7 @@ int main(){
 	 break;
       }
 
+      checkKilledPids(); 
       printFinishedJobs();
 
       // 2. Grab and parse input - remove newLine modifier (\n)  
@@ -79,8 +80,8 @@ int main(){
 	    waitpid(pid,&status,WUNTRACED); 
 	    tcsetpgrp(0,yashPid);
 
-	    if(WIFEXITED(status) || WIFSIGNALED(status)){
-	      job node = pop();
+        if(WIFEXITED(status) || WIFSIGNALED(status)){
+     	      job node = pop();
 	      free(node.command);
             } else if(WIFSTOPPED(status)){  	
               changeRunState(peek(),STOPPED);

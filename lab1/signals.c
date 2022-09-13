@@ -78,8 +78,4 @@ static void sig_stp(int signo){
 static void sig_chld(int signo){
    int status = 0;
    waitpid(-1,&status,WUNTRACED | WNOHANG);
- 
-   if(getpid() == YashPid){
-      checkKilledPids(); 
-   }
 }

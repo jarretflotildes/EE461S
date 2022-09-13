@@ -13,10 +13,10 @@ job pop();
 int peek();
 int getStackSize();
 int getMostRecentStopped();
+void changeRunState(int num,int newRunState);
 
 void checkKilledPids();
-void changeRunStatePos(int pgid,int newRunState);
-void changeRunState(int stackNum,int newRunState);
+
 void freeStack();
 int getHighestJobNum();
 

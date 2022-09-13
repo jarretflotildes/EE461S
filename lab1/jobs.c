@@ -99,32 +99,15 @@ void checkKilledPids(){
    for(int i = 0;i<JobIndex;i++){
       int killStatus = kill(-1*JobList[i]->pgid,0);
       if(killStatus == -1){
-         changeRunStatePos(JobList[i]->pgid,DONE);
+         JobList[i]->runState = DONE;
       }
    }
 
 }
 
-void changeRunStatePos(int pgid,int newRunState){
-
-   for(int i = 0;i<JobIndex;i++){
-      if(JobList[i]->pgid == pgid){
-         JobList[i]->runState = newRunState;
-      }
-   }
-
+void changeRunState(int num,int newRunState){
+   JobList[num]->runState = newRunState;
 }
-
-void changeRunState(int stackNum,int newRunState){
-
-   for(int i = 0;i<JobIndex;i++){
-      if(i == stackNum){
-         JobList[i]->runState = newRunState;
-      }
-   }
-}
-
-
 
 void printNode(job node){
    if(JobList[Top]->pgid == node.pgid){
@@ -178,7 +161,7 @@ void printFinishedJobs(){
    for(int i = 0;i<JobIndex;i++){ 
       if(JobList[i]->runState == 2) { //NOT TOP -
          if(i == Top){ //TOP + 
-         printf("[%d]+ %s                 %s\n",JobList[i]->jobNum,runState[JobList[i]->runState],JobList[i]->command);
+            printf("[%d]+ %s                 %s\n",JobList[i]->jobNum,runState[JobList[i]->runState],JobList[i]->command);
             } else { //NOT TOP -
             printf("[%d]- %s                 %s\n",JobList[i]->jobNum,runState[JobList[i]->runState],JobList[i]->command);
          }
@@ -188,7 +171,6 @@ void printFinishedJobs(){
    cleanJobs();
 
 }
-
 
 //remove jobs that are finished from array
 void cleanJobs(){
@@ -201,13 +183,14 @@ void cleanJobs(){
 
    for(int i = 0;i<JobIndex;i++){
       if(JobList[i]->runState != DONE){
-         newJobList[j] = JobList[i];
-         j++;
+         newJobList[j] = JobList[i];         
+	 j++;
 	 newJobIndex++;
 	 newTop = newJobIndex - 1;	 
       } else {
-          free(JobList[i]->command);
-	  free(JobList[i]);
+//          free(JobList[i]->command);
+//	  free(JobList[i]);
+	  JobList[i] = NULL;
       }
    }
 
@@ -271,15 +254,15 @@ void executeJobs(char *command,char **tokens,int yashPid){
            job freeNode = pop();
 	   free(freeNode.command);
        	 } else if(WIFSTOPPED(status)){  	
-           changeRunState(peek(),0); //change top of stack to stopped
+	      JobList[Top]->runState = STOPPED;
          }
       }
    }
 
    if(strcmp(command,"bg") == 0){
       if(getMostRecentStopped() >= 0){
-	 int mostRecent = getMostRecentStopped();
-         JobList[mostRecent]->runState = RUNNING;	
+         int mostRecent = getMostRecentStopped();
+	 JobList[mostRecent]->runState = RUNNING;	
 	 kill(-1*JobList[mostRecent]->pgid,SIGCONT);
 	 waitpid(-1,&status,WNOHANG); //main parent keeps going 
       }
@@ -294,19 +277,19 @@ void executeJobs(char *command,char **tokens,int yashPid){
             pid_t childPid = getpid();
       	    setpgid(0,0);    //turn child into new process group
 
-            push(pid,1,command); 
             signal(SIGINT,SIG_DFL);  //set disposition back to default
             signal(SIGTSTP,SIG_DFL);
             
 	    // 5. execute commands using execvp or execlp   
             char **removeAnd = chopArray(tokens,sizeOfArray(tokens),0,sizeOfArray(tokens)-1);
-	    executeCommand(removeAnd,sizeOfArray(removeAnd),status,childPid);
 
+	    executeCommand(removeAnd,sizeOfArray(removeAnd),status,childPid);
+            
 	    exit(0);	    
 
 	 } else {
 	    setpgid(pid,0); //turn child into new process group
-            push(pid,1,command); 
+            push(pid,RUNNING,command); 
             waitpid(-1,&status,WNOHANG); //main parent keeps going
 	 }
       }
