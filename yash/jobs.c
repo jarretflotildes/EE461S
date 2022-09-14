@@ -16,7 +16,7 @@
 #include "parse.h"
 #include "actionModule.h"
 
-#define STACKSIZE 30
+#define STACKSIZE 64
 
 #define STOPPED    0
 #define RUNNING    1
@@ -32,7 +32,7 @@ typedef struct job {
 
 } job;
 */
-job *JobList[50];
+job *JobList[STACKSIZE];
 
 int JobIndex;
 int Top; //jobIndex - 1
