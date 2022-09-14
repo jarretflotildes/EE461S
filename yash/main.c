@@ -1,7 +1,6 @@
-/*
- *
- *
- * 
+/*Jarret Flotildes
+ *jrf3524
+ *ECE461S - Fall2022
  */
 
 #include <stdio.h>
